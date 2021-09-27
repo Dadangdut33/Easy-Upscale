@@ -1,7 +1,8 @@
 # About
-Repository kelompok 10 struktur data kelas 3A\
+Repository kelompok 10 gabung kelompok 6 struktur data kelas 3A\
 Anggota:
-1. Fauzan Farhan A - 11200910000004
+1. Fauzan Farhan A - 11200910000004 (Asal dari Kelompok 10)
+2. M Hanif - 11200910000021 (Asal dari Kelompok 6)
 
 # Rencana
 - Membuat aplikasi bentuk gui berbasis python dengan library tkinter

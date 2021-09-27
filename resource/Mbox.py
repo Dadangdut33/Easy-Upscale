@@ -19,4 +19,4 @@ def Mbox(title, text, style):
     elif style == 2:
         return messagebox.showerror(title, text) # Return ok x same as ok
     elif style == 3:
-        return messagebox.askyesno(title, text) # Return True False, x can't be clicked##  Styles:
+        return messagebox.askyesno(title, text) # Return True False, x can't be clicked
