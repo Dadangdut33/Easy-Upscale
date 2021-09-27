@@ -1,7 +1,6 @@
 from tkinter import *
 import tkinter.ttk as ttk
 import threading
-import os
 
 # Ex:  run_func_with_loading_popup(lambda: task('joe'), 'joe_mama') 
 def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8, pb_length = None):
