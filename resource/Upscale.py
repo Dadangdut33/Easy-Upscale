@@ -1,6 +1,8 @@
 import cv2
 import os
 import matplotlib.pyplot as plt
+from Loading_Popup import run_func_with_loading_popup
+from tkinter import *
 from Mbox import Mbox
 dir_path = os.path.dirname(os.path.realpath(__file__))
 dir_Output = dir_path + "/../output/"
@@ -27,7 +29,7 @@ class Upscale:
     """
     Contains all the methods/functions to upscale, error ui will be thrown from here. Results send back are either success or failure.
     """
-    def ESPCN(self, img, scale):
+    def ESPCN(self, img, scale, noise_removal):
         """Upscale the image using ESPCN models, available scale are 2 3 4"""
         status = False
         try:
@@ -50,11 +52,25 @@ class Upscale:
 
             # Upscale
             imgGet = cv2.imread(img) # read the images
-            result = sr.upsample(imgGet) # upscale the input image
+            print('Upscaling the image.... Please wait....')
+        
+            upscaled = sr.upsample(imgGet) # upscale the input image
+            print('Upscaling complete!')
 
-            # Ouput
-            cv2.imwrite(dir_path + "/../output/" + getImgName(img) + " " + scales[scale] + ".png", result)
-            
+            if noise_removal:
+                # Noise removal
+                print('Removing noise.... Please wait....')
+                denoised = cv2.fastNlMeansDenoisingColored(upscaled, None, 10, 10, 7, 21) # denoise the image
+                print('Noise removal complete!')
+
+                # Save the image
+                cv2.imwrite(dir_path + "/../output/" + getImgName(img) + " " + scales[scale] + "denoised .png", denoised)
+                print("Image saved to: " + dir_path + "/../output/" + getImgName(img) + " " + scales[scale] + "denoised .png")
+            else:
+                # Save the image
+                cv2.imwrite(dir_path + "/../output/" + getImgName(img) + " " + scales[scale] + ".png", upscaled)
+                print("Image saved to: " + dir_path + "/../output/" + getImgName(img) + " " + scales[scale] + ".png")
+
             # Set status to success
             status = True
         except InvalidScale as e:
@@ -77,9 +93,14 @@ class Upscale:
         finally:
             return status
         
-
-
 if __name__ == "__main__":
     upscale = Upscale()
-    print("Img: " + dir_path + "/../sample_img/sample.png")
-    upscale.ESPCN(dir_path + "/../sample_img/sample2.png", 4)
+    bounc_speed = 4
+    pb_length = 200
+    window_title = "Loading..."
+    msg = 'Loading, please wait...'
+
+    x = run_func_with_loading_popup(lambda: upscale.ESPCN(dir_path + "/../img/sample_img/sample2.png", 4, True), msg, window_title, bounc_speed, pb_length)
+
+    print(x)
+    os._exit(1)
