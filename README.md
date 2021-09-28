@@ -13,8 +13,8 @@ Masih rencana, jika projek terlihat tidak dapat diselesaikan maka akan coba diga
 
 | Task                                              |  Assigned to  | Current Status | Finished  | 
 |---------------------------------------------------|---------------|----------------|-----------|
-| Buat logic untuk meng-upscale image               | Fauzan        | In progress    | ⬜
+| Buat logic untuk meng-upscale image               | Fauzan        | Done           | ✅
 | Buat logic pooling gambar dengan circural queue   | Fauzan        | In progress    | ⬜
-| Buat gui                                          | Fauzan        | Waiting        | ⬜
-| Implementasi backend dengan frontend gui          | Fauzan        | Waiting        | ⬜
-| Test aplikasi                                     | Fauzan        | Waiting        | ⬜
+| Buat gui                                          | -        | Waiting        | ⬜
+| Implementasi backend dengan frontend gui          | -        | Waiting        | ⬜
+| Test aplikasi                                     | -        | Waiting        | ⬜
