@@ -34,14 +34,25 @@ def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8
             self.load_bar = ttk.Progressbar(top)
             self.load_bar.pack(padx = 10, pady = (0,10))
 
+            # The cancel button
+            self.cancel_btn = Button(top, text='Cancel', command=self.top.destroy)
+            self.cancel_btn.pack(padx = 10, pady = 5)
+
             self.bar_init()
 
         def bar_init(self):
             self.start_bar_thread = threading.Thread(target=self.start_bar, args=())
-            
-            # start the bar handling thread
+            self.start_bar_thread.daemon = True
             self.start_bar_thread.start()
 
+        def cancel(self):
+            # Destroy frame
+            self.top.destroy()
+
+            # Stop the threads
+            self.start_bar_thread.set()
+            self.work_thread.set()
+        
         def start_bar(self):
             # load bar configuration
             self.load_bar.config(mode='indeterminate', maximum=100, value=0, length = self.pb_length)
@@ -51,8 +62,9 @@ def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8
 
             # start the work thread
             self.work_thread = threading.Thread(target=self.work_task, args=())
+            self.work_thread.daemon = True
             self.work_thread.start()
-            
+
             # wait for the work thread to finish
             self.work_thread.join()
 
@@ -68,4 +80,7 @@ def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8
     # call Main_Frame class with reference to root as top
     Main_Frame(root, window_title, bounce_speed, pb_length)
     root.mainloop() 
-    return func_return_l[0]
+    if len(func_return_l) > 0:
+        return func_return_l[0]
+    else:
+        return None

@@ -2,8 +2,8 @@ import cv2
 import os
 import time
 from datetime import timedelta
-from .Loading_Popup import run_func_with_loading_popup
-from .Mbox import Mbox
+from Loading_Popup import run_func_with_loading_popup
+from Mbox import Mbox
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Error(Exception):
@@ -186,8 +186,18 @@ if __name__ == "__main__":
     noiseRemoved = ' and removing noise' if noise_removal else ''
     msg = f'Upscaling {getImgName(img)}{noiseRemoved}\nusing {up_type}_x{scale}, please wait...'
 
-    x = run_func_with_loading_popup(lambda: upscale.up_type(up_type, img, scale, noise_removal), msg, window_title, bounc_speed, pb_length)
+    x = run_func_with_loading_popup(lambda: upscale.up_type(up_type, img, scale, noise_removal, r"D:\Coding\2021_Sem_3\Struktur_Data\Proyek\kel10-strukdat\output\\"), msg, window_title, bounc_speed, pb_length)
 
-    print("succes" if x else "failed")
+    # print("succes" if x else "failed")
+
+    if x == None:
+        print("Canceled")
+
+    if x:
+        print("Success")
+    elif x == False:
+        print("Failed")
+
+    print("Done!")
 
     os._exit(1)
