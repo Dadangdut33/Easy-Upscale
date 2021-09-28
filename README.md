@@ -14,7 +14,7 @@ Masih rencana, jika projek terlihat tidak dapat diselesaikan maka akan coba diga
 | Task                                              |  Assigned to  | Current Status | Finished  | 
 |---------------------------------------------------|---------------|----------------|-----------|
 | Buat logic untuk meng-upscale image               | Fauzan        | Done           | ✅
-| Buat logic pooling gambar dengan circural queue   | Fauzan        | In progress    | ⬜
-| Buat gui                                          | -        | Waiting        | ⬜
+| Buat logic pooling gambar dengan circural queue   | Fauzan        | Done           | ✅
+| Buat gui                                          | -        | In proggress        | ⬜
 | Implementasi backend dengan frontend gui          | -        | Waiting        | ⬜
 | Test aplikasi                                     | -        | Waiting        | ⬜
