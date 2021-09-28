@@ -2,12 +2,9 @@ import cv2
 import os
 import time
 from datetime import timedelta
-import matplotlib.pyplot as plt
-from Loading_Popup import run_func_with_loading_popup
-from tkinter import *
+from .Loading_Popup import run_func_with_loading_popup
 from .Mbox import Mbox
 dir_path = os.path.dirname(os.path.realpath(__file__))
-dir_Output = dir_path + "/../output/"
 
 class Error(Exception):
     """
@@ -40,8 +37,24 @@ class Upscale:
     """
     Contains the methods/functions to upscale, error ui will be thrown from here. Results send back are boolean either success (True) or failure (False).
     """
-    def up_type(self, up_type, img, scale, noise_removal): # Fast
+    # -------------------------------------------------
+    # Create dir if not exists
+    def createDirIfGone(self, dir_Output):
+        # Will create the dir if not exists
+        if not os.path.exists(dir_Output):
+            try:
+                os.makedirs(dir_Output)
+            except Exception as e:
+                print("Error: " + str(e))
+                Mbox("Error: ", str(e), 2)
+
+    # -------------------------------------------------
+    # Upscale
+    def up_type(self, up_type, img, scale, noise_removal, dir_Output): # Fast
         """Upscale the image using ESPCN models, available scale are 2 3 4"""
+        # Check directory first
+        self.createDirIfGone(dir_Output)
+        # Set var
         is_Success = False
         startTime = time.time()
         try:
