@@ -38,12 +38,12 @@ def get_time_hh_mm_ss(sec):
 
 class Upscale:
     """
-    Contains all the methods/functions to upscale, error ui will be thrown from here. Results send back are either success or failure.
+    Contains all the methods/functions to upscale, error ui will be thrown from here. Results send back are boolean either success (True) or failure (False).
     """
     def ESPCN(self, img, scale, noise_removal): # Fast
         """Upscale the image using ESPCN models, available scale are 2 3 4"""
         is_Success = False
-        print("="*50 + "\nESPCN Upscaling.\nScale\t\t: {}\nRemove noise\t: {}".format(scale, noise_removal))
+        print("="*50 + f"\nESPCN Upscaling.\nScale\t\t: {scale}\nRemove noise\t: {noise_removal}")
         startTime = time.time()
         try:
             # Super resolution
@@ -61,33 +61,33 @@ class Upscale:
             sr.readModel(pathToModel) # Load the model
             sr.setModel("espcn", scale) # set the model by passing the value and the upsampling ratio
 
-            print("Loading model from: " + pathToModel)
+            print(">> Loading model from: " + pathToModel)
 
             # Upscale
             imgGet = cv2.imread(img) # read the images
-            print('Upscaling the image.... Please wait....')
+            print('>> Upscaling the image.... Please wait....')
         
             upscaled = sr.upsample(imgGet) # upscale the input image
             print('Upscaling complete!')
             upscaled_Time = time.time()
-            print('Upscaling took ' + get_time_hh_mm_ss(upscaled_Time - startTime) + ' seconds')
+            print(f'Upscaling took {get_time_hh_mm_ss(upscaled_Time - startTime)} seconds')
 
             if noise_removal:
                 # Noise removal
-                print('Removing noise.... Please wait....')
+                print('>> Removing noise.... Please wait....')
                 denoised = cv2.fastNlMeansDenoisingColored(upscaled, None, 10, 10, 7, 21) # denoise the image
                 print('Noise removal complete!')
-                print('Denoising took ' + get_time_hh_mm_ss(time.time() - upscaled_Time) + ' seconds')
+                print(f'Denoising took {get_time_hh_mm_ss(time.time() - upscaled_Time)} seconds')
 
                 # Save the image
-                outputDir = dir_path + "/../output/" + getImgName(img) + " " + scales[scale] + " denoised.png"
+                outputDir = f"{dir_path}/../output/{getImgName(img)} {scales[scale]} denoised.png"
                 cv2.imwrite(outputDir, denoised)
-                print("Image saved to: " + outputDir)
+                print(">> Image saved to: " + outputDir)
             else:
                 # Save the image
-                outputDir = dir_path + "/../output/" + getImgName(img) + " " + scales[scale] + ".png"
+                outputDir = f"{dir_path}/../output/{getImgName(img)} {scales[scale]}.png"
                 cv2.imwrite(outputDir, upscaled)
-                print("Image saved to: " + outputDir)
+                print(">> Image saved to: " + outputDir)
 
             # Set status to success
             is_Success = True
@@ -118,12 +118,13 @@ class Upscale:
             # Error popup
             Mbox("Error", "Error occured while processing the image.\n\nDetails: " + str(e), 2)
         finally:
+            print(f">> Total time taken: {get_time_hh_mm_ss(time.time() - startTime)}")
             return is_Success
 
     def EDSR(self, img, scale, noise_removal): # Very slow, like really slow
         """Upscale the image using EDSR models, available scale are 2 3 4"""
         is_Success = False
-        print("="*50 + "\nEDSR Upscaling.\nScale\t\t: {}\nRemove noise\t: {}".format(scale, noise_removal))
+        print("="*50 + f"\nEDSR Upscaling.\nScale\t\t: {scale}\nRemove noise\t: {noise_removal}")
         startTime = time.time()
         try:
             # Super resolution
@@ -141,33 +142,33 @@ class Upscale:
             sr.readModel(pathToModel) # Load the model
             sr.setModel("edsr", scale) # set the model by passing the value and the upsampling ratio
 
-            print("Loading model from: " + pathToModel)
+            print(">> Loading model from: " + pathToModel)
 
             # Upscale
             imgGet = cv2.imread(img) # read the images
-            print('Upscaling the image.... Please wait....')
+            print('>> Upscaling the image.... Please wait....')
         
             upscaled = sr.upsample(imgGet) # upscale the input image
             print('Upscaling complete!')
             upscaled_Time = time.time()
-            print('Upscaling took ' + get_time_hh_mm_ss(upscaled_Time - startTime) + ' seconds')
+            print(f'Upscaling took {get_time_hh_mm_ss(upscaled_Time - startTime)} seconds')
             
             if noise_removal:
                 # Noise removal
-                print('Removing noise.... Please wait....')
+                print('>> Removing noise.... Please wait....')
                 denoised = cv2.fastNlMeansDenoisingColored(upscaled, None, 10, 10, 7, 21) # denoise the image
                 print('Noise removal complete!')
-                print('Denoising took ' + get_time_hh_mm_ss(time.time() - upscaled_Time) + ' seconds')
+                print(f'Denoising took {get_time_hh_mm_ss(time.time() - upscaled_Time)} seconds')
 
                 # Save the image
-                outputDir = dir_path + "/../output/" + getImgName(img) + " " + scales[scale] + " denoised.png"
+                outputDir = f"{dir_path}/../output/{getImgName(img)} {scales[scale]} denoised.png"
                 cv2.imwrite(outputDir, denoised)
-                print("Image saved to: " + outputDir)
+                print(">> Image saved to: " + outputDir)
             else:
                 # Save the image
-                outputDir = dir_path + "/../output/" + getImgName(img) + " " + scales[scale] + ".png"
+                outputDir = f"{dir_path}/../output/{getImgName(img)} {scales[scale]}.png"
                 cv2.imwrite(outputDir, upscaled)
-                print("Image saved to: " + outputDir)
+                print(">> Image saved to: " + outputDir)
 
             # Set status to success
             is_Success = True
@@ -198,16 +199,30 @@ class Upscale:
             # Error popup
             Mbox("Error", "Error occured while processing the image.\n\nDetails: " + str(e), 2)
         finally:
+            print(f">> Total time taken: {get_time_hh_mm_ss(time.time() - startTime)}")
             return is_Success
+    
+
+    
         
 if __name__ == "__main__":
     upscale = Upscale()
     bounc_speed = 4
-    pb_length = 200
+    pb_length = 250
     window_title = "Loading..."
-    msg = 'Loading, please wait...'
+    img = dir_path + "/../img/sample_img/sample1.png"
+    # msg = 'Upscaling ' +  getImgName(img) + ', please wait...'
+    scale = 4
+    noise_removal = True
+    noiseRemoved = 'and removing noise' if noise_removal else ''
+    msg = f'Upscaling {getImgName(img)} to {scale}x {noiseRemoved}, please wait'
 
-    x = run_func_with_loading_popup(lambda: upscale.ESPCN(dir_path + "/../img/sample_img/sample2.png", 4, True), msg, window_title, bounc_speed, pb_length)
+
+    x = run_func_with_loading_popup(lambda: upscale.ESPCN(dir_path + "/../img/sample_img/sample1.png", 2, False), msg, window_title, bounc_speed, pb_length)
 
     print(x)
+
+    # y = run_func_with_loading_popup(lambda: upscale.ESPCN(dir_path + "/../img/sample_img/sample1.png", 3, True), msg, window_title, bounc_speed, pb_length)
+
+    # print(y)
     os._exit(1)
