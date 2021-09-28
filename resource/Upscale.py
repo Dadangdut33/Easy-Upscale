@@ -5,7 +5,7 @@ from datetime import timedelta
 import matplotlib.pyplot as plt
 from Loading_Popup import run_func_with_loading_popup
 from tkinter import *
-from Mbox import Mbox
+from .Mbox import Mbox
 dir_path = os.path.dirname(os.path.realpath(__file__))
 dir_Output = dir_path + "/../output/"
 
