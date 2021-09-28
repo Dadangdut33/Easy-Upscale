@@ -52,8 +52,8 @@ def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8
             # start the work thread
             self.work_thread = threading.Thread(target=self.work_task, args=())
             self.work_thread.start()
-
-            # close the work thread
+            
+            # wait for the work thread to finish
             self.work_thread.join()
 
             # Destroy the loading frame
