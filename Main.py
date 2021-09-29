@@ -49,11 +49,11 @@ class MainWindow:
     def __init__(self):
         self.root = Tk()
         self.settings_window = SettingUI()
-        self.image_Pool = Circular_Q(50) # Max image pool is 50
+        self.upscale_Queue = Circular_Q(50) # Max image pool is 50
         self.root.title("Ez Upscale")
         self.root.geometry("700x500")
         self.alwaysOnTop = False
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_Closing)
 
         # Frames
         # Top Frame
@@ -82,7 +82,18 @@ class MainWindow:
 
         # 3rd frame for the queue and the button
         self.thirdFrame = ttk.LabelFrame(self.root, text="• Queue")
-        self.thirdFrame.pack(side=TOP, fill=X, expand=False)
+        self.thirdFrame.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=5)
+
+        self.thirdFrameContent = Frame(self.thirdFrame)
+        self.thirdFrameContent.pack(side=TOP, fill=X, expand=False)
+
+        self.thirdFrameContent_2 = Frame(self.thirdFrame)
+        self.thirdFrameContent_2.pack(side=TOP, fill=X, expand=False)
+
+        self.thirdFrameContent_3 = Frame(self.thirdFrame) # For treeview
+        self.thirdFrameContent_3.pack(side=TOP, fill=BOTH, expand=True)
+        # self.thirdFrameContent_3.columnconfigure(0, weight=1) # Column with treeview
+        # self.thirdFrameContent_3.rowconfigure(0, weight=1) # row with treeview
 
         # ----------------------------------------------------------------
         # Browse image
@@ -129,27 +140,48 @@ class MainWindow:
         self.scaling_options_combobox.current(0)
 
         # Create a checkbox for remove noise or not
-        self.remove_noise_var = BooleanVar()
-        self.remove_noise_checkbox = Checkbutton(self.secondFrameContent_3, text="Remove Noise", variable=self.remove_noise_var)
+        self.remove_Noise_Var = BooleanVar()
+        self.remove_noise_checkbox = Checkbutton(self.secondFrameContent_3, text="Remove Noise", variable=self.remove_Noise_Var)
         self.remove_noise_checkbox.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for image to upscale
-        self.add_to_queue_button = Button(self.secondFrameContent_4, text="Add to queue", command=self.upscale_Image)
-        self.add_to_queue_button.pack(side=LEFT, expand=True, fill=X, padx=5, pady=5)
+        self.add_to_queue_button = Button(self.secondFrameContent_4, text="Add to queue", command=self.add_To_Queue)
+        self.add_to_queue_button.pack(side=LEFT, expand=True, fill=BOTH, padx=5, pady=5)
 
         # ----------------------------------------------------------------
         # Queue Frame / 3rd frame
-        self.queueFrame = ttk.Frame(self.thirdFrame)
-        self.queueFrame.pack(side=TOP, fill=BOTH, expand=True)
+        # Create a label for queue
+        self.queue_label = Label(self.thirdFrameContent, text="Total Item in Queue : ")
+        self.queue_label.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a button for upscale all
+        self.upscale_all_button = Button(self.thirdFrameContent_2, text="Upscale all", command=self.upscale_All)
+        self.upscale_all_button.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a button for upscale top queue
+        self.upscale_top_button = Button(self.thirdFrameContent_2, text="Upscale top", command=self.upscale_Top)
+        self.upscale_top_button.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a button for remove top queue
+        self.remove_top_button = Button(self.thirdFrameContent_2, text="Remove top", command=self.remove_Top)
+        self.remove_top_button.pack(side=LEFT, fill=X, padx=5, pady=5)
+
+        # Create a button for clear queue
+        self.clear_queue_button = Button(self.thirdFrameContent_2, text="Clear queue", command=self.clear_Queue)
+        self.clear_queue_button.pack(side=LEFT, fill=X, padx=5, pady=5)
+        
+        # Create a treeview for queue
+        self.tree = ttk.Treeview(self.thirdFrameContent_3, columns=("Image Name", "Image Dimensions", "Model", "Scale", "Remove Noise"))
+        self.tree.pack(side=TOP, expand=True, fill=BOTH, padx=5, pady=5)
 
         # Menubar
         self.menubar = Menu(self.root)
 
         # Menu item
         self.file_menu = Menu(self.menubar, tearoff=0)
-        self.file_menu.add_checkbutton(label="Always on Top", command=self.always_on_top)
+        self.file_menu.add_checkbutton(label="Always on Top", command=self.always_On_Top)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit Application", command=self.on_closing)
+        self.file_menu.add_command(label="Exit Application", command=self.on_Closing)
         self.menubar.add_cascade(label="Options", menu=self.file_menu)
 
         self.filemenu2 = Menu(self.menubar, tearoff=0)
@@ -175,7 +207,7 @@ class MainWindow:
         self.settings_window.show()
 
     # Menubar
-    def always_on_top(self):
+    def always_On_Top(self):
         if self.alwaysOnTop:
             self.alwaysOnTop = False
             self.root.wm_attributes('-topmost', False)
@@ -198,7 +230,7 @@ class MainWindow:
             self.add_to_queue_button["state"] = "disabled"
 
     # on close
-    def on_closing(self):
+    def on_Closing(self):
         if Mbox("Confirmation", "Are you sure you want to exit?", 3):
             self.root.destroy()
             exit()        
@@ -276,8 +308,49 @@ class MainWindow:
         except Exception as e:
             self.scaling_options_combobox.current(0)
 
-    # Upscale Image
-    def upscale_Image(self):
+    # Add to queue
+    def add_To_Queue(self):
+        # Double checking
+        # Check if the image is inputted
+        if self.image_path_textbox.get() == "":
+            Mbox("Error", "Please input the image", 0)
+            return
+        # Check if the model is inputted
+        if self.model_choosing_combobox.get() == "":
+            Mbox("Error", "Please input the model", 0)
+            return
+        # Check if the scale is inputted
+        if self.scaling_options_combobox.get() == "":
+            Mbox("Error", "Please input the scale", 0)
+            return
+
+        # Get the data
+        image_path = self.image_path_textbox.get()
+        model_name = self.model_choosing_combobox.get()
+        scale = self.scaling_options_combobox.get()
+        remove_noise = self.remove_Noise_Var.get()
+        # Add to queue
+        self.upscale_Queue.enqueue([image_path, getImgName(image_path), getImgDetails(image_path), model_name, scale, remove_noise])
+        # Update the label
+        self.queue_label.config(text="Total Item in Queue : " + str(self.upscale_Queue.get_Size()))
+
+        # Log the queue to console
+        self.upscale_Queue.display()
+
+    # Upscale all
+    def upscale_All(self):
+        pass
+
+    # Upscale top
+    def upscale_Top(self):
+        pass
+
+    # Remove top
+    def remove_Top(self):
+        pass
+
+    # Remove all
+    def clear_Queue(self):
         pass
 
 if __name__ == "__main__":

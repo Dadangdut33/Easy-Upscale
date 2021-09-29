@@ -52,6 +52,14 @@ class Circular_Q:
         finally:
             return is_Success
 
+    def get_Size(self):
+        """Get the size of the queue
+
+        Returns:
+            [int]: size of the queue
+        """
+        return self.size
+
     def display(self):
         """
         Display the queue
