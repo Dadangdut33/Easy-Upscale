@@ -6,6 +6,8 @@ from resource.JsonHandling import JsonHandler
 from resource.Upscale import Upscale, getImgName
 from resource.Queue import Circular_Q
 from resource.Mbox import Mbox
+import webbrowser
+import subprocess
 import pyperclip
 
 # Create a public jsonHandler object
@@ -18,9 +20,110 @@ def console():
     print("Use The GUI Window to start upscaling")
     print("This window is for debugging purposes")
 
+def startfile(filename):
+  try:
+    os.startfile(filename)
+  except:
+    subprocess.Popen(['xdg-open', filename])
+
+def OpenUrl(url):
+    webbrowser.open_new(url)
+
 # ----------------------------------------------------------------
 # SettingUI
 class SettingUI():
+    # -------------------------------------------------
+    # Constructor
+    def __init__(self):
+        self.root = Tk()
+        self.root.title("Settings")
+        self.root.geometry("500x150")
+        self.root.wm_attributes('-topmost', False) # Keep on top or not
+        self.root.wm_withdraw()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        # Frames
+        self.firstFrame = ttk.LabelFrame(self.root, text="• Image / OCR Setting")
+        self.firstFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
+        
+        self.firstFrameContent = Frame(self.firstFrame)
+        self.firstFrameContent.pack(side=TOP, fill=X, expand=False)
+        
+        self.firstFrameContent_2 = Frame(self.firstFrame)
+        self.firstFrameContent_2.pack(side=TOP, fill=X, expand=False)
+
+        self.bottomFrame = Frame(self.root)
+        self.bottomFrame.pack(side=BOTTOM, fill=BOTH, expand=False)
+
+        # Var
+        self.image_output_checkbutton_var = BooleanVar(self.root, name="image_output_check_default", value=True)
+
+        # Create a checkbutton for image output default or not
+        self.image_output_checkbutton = ttk.Checkbutton(self.firstFrameContent, text="Default Output Folder", variable=self.image_output_checkbutton_var, command=self.checkBtnChanged)
+        self.image_output_checkbutton.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
+
+        # Create a textbox for image output folder
+        self.image_output_textbox = ttk.Entry(self.firstFrameContent_2)
+        self.image_output_textbox.pack(side=LEFT, fill=X, expand=True, padx=5, pady=5)
+        self.image_output_textbox.bind("<Key>", lambda event: "break") # Disable the textbox to input
+
+        # Create a button for image output folder
+        self.image_output_button = ttk.Button(self.firstFrameContent_2, text="Browse", command=self.folder_Dialog)
+        self.image_output_button.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
+
+        # Read default settings using the functions in jsonHandling
+        setting_Status, settings = fJson.loadSetting()
+        if setting_Status == True:
+            # Check settings output folder
+            if settings["output_folder"].lower() == "default":
+                print("Settings successfully loaded!")
+                self.image_output_checkbutton_var.set(True)
+                self.image_output_textbox.delete(0, END)
+                self.image_output_textbox.insert(0, settings["output_path"])
+            else:
+                # First check if the folder exists
+                if os.path.isdir(settings["output_path"]):
+                    print("Settings successfully loaded!")
+                    self.image_output_checkbutton_var.set(False)
+                    self.image_output_textbox.delete(0, END)
+                    self.image_output_textbox.insert(0, settings["output_path"])
+                else:
+                    print("Directory not found! Program will set the output directory to default!")
+                    Mbox("Warning", "Directory not found! Program will set the output directory to default!", 2)
+                    status, details = fJson.setDefault()
+                    if status:
+                        Mbox("Success", details, 0)
+                    else: # Error should not happen but just in case
+                        Mbox("Error", details, 2)
+
+                    status, details = fJson.loadSetting()
+                    self.image_output_textbox.delete(0, END)
+                    self.image_output_textbox.insert(0, details["output_path"])
+        else: # Error should not happen but just in case
+            print("Error: Cannot load settings")
+            Mbox("Error", settings, 2)
+
+        # Create a button for save settings
+        self.save_button = ttk.Button(self.bottomFrame, text="Save", command=self.save_Settings)
+        self.save_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
+
+        # Create a button for copy currently set path
+        self.copy_button = ttk.Button(self.bottomFrame, text="Copy Path", command=self.copy_Path)
+        self.copy_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
+
+        # Create a button for set to currently set setting
+        self.currently_stored_button = ttk.Button(self.bottomFrame, text="Set to currently saved settings", command=self.set_Currently_Stored)
+        self.currently_stored_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
+
+        # Create a button for set settings to default
+        self.default_button = ttk.Button(self.bottomFrame, text="Set to Default", command=self.set_Default)
+        self.default_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
+
+        # Initiation
+        self.iniate_Elements()
+
+    # -------------------------------------------------
+    # Functions
     def folder_Dialog(self):
         if not self.image_output_checkbutton_var.get() == True:
             self.folder_Get = filedialog.askdirectory()
@@ -31,6 +134,15 @@ class SettingUI():
 
                 # Then input the new dir
                 self.image_output_textbox.insert(0, self.folder_Get.replace('/', '\\'))
+    
+    # Open settings
+    def show(self):
+        self.iniate_Elements()
+        self.root.wm_deiconify()
+
+    # Close settings
+    def on_closing(self):
+        self.root.wm_withdraw()
 
     # Initiate all the elements
     def iniate_Elements(self):
@@ -104,17 +216,33 @@ class SettingUI():
             else:
                 print(details)
                 Mbox("Error", details, 2)
+    
+    # Set current setting to currently stored
+    def set_Currently_Stored(self):
+        # Ask for confirmation
+        if Mbox("Confirmation", "Are you sure you want to reset the currently stored settings?", 3):            
+            settings = fJson.readSetting()
+            print(settings)
+            Mbox("Success", "Successfully set setting to currently stored", 0)
 
+            self.iniate_Elements()
+
+
+class MainWindow:
     # -------------------------------------------------
     # Constructor
     def __init__(self):
         self.root = Tk()
-        self.root.title("Settings")
+        self.settings_window = SettingUI()
+        self.image_Pool = Circular_Q(50) # Max image pool is 50
+        self.root.title("Ez Upscale")
         self.root.geometry("500x150")
-        self.root.wm_attributes('-topmost', False) # Keep on top or not
+        self.alwaysOnTop = False
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         # Frames
-        self.firstFrame = ttk.LabelFrame(self.root, text="• Image / OCR Setting")
+        # Top Frame
+        self.firstFrame = Frame(self.root)
         self.firstFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
         
         self.firstFrameContent = Frame(self.firstFrame)
@@ -126,70 +254,93 @@ class SettingUI():
         self.bottomFrame = Frame(self.root)
         self.bottomFrame.pack(side=BOTTOM, fill=BOTH, expand=False)
 
-        # Var
-        self.image_output_checkbutton_var = BooleanVar(self.root, name="image_output_check_default", value=True)
+        # Queue Frame
+        self.queueFrame = ttk.Frame(self.bottomFrame)
+        self.queueFrame.pack(side=TOP, fill=BOTH, expand=True)
 
-        # Create a checkbutton for image output default or not
-        self.image_output_checkbutton = ttk.Checkbutton(self.firstFrameContent, text="Default Output Folder", variable=self.image_output_checkbutton_var, command=self.checkBtnChanged)
-        self.image_output_checkbutton.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
+        # Create a button for image to text conversion
+        self.convert_button = ttk.Button(self.firstFrameContent, text="Convert")
+        self.convert_button.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
 
-        # Create a textbox for image output folder
-        self.image_output_textbox = ttk.Entry(self.firstFrameContent_2)
-        self.image_output_textbox.pack(side=LEFT, fill=X, expand=True, padx=5, pady=5)
-        self.image_output_textbox.bind("<Key>", lambda event: "break") # Disable the textbox to input
+        # Menubar
+        self.menubar = Menu(self.root)
 
-        # Create a button for image output folder
-        self.image_output_button = ttk.Button(self.firstFrameContent_2, text="Browse", command=self.folder_Dialog)
-        self.image_output_button.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
+        # Menu item
+        self.file_menu = Menu(self.menubar, tearoff=0)
+        self.file_menu.add_checkbutton(label="Always on Top", command=self.always_on_top)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit Application", command=self.on_closing)
+        self.menubar.add_cascade(label="Options", menu=self.file_menu)
 
-        # Read default settings using the functions in jsonHandling
-        setting_Status, settings = fJson.loadSetting()
-        if setting_Status == True:
-            # Check settings output folder
-            if settings["output_folder"].lower() == "default":
-                print("Settings successfully loaded!")
-                self.image_output_checkbutton_var.set(True)
-                self.image_output_textbox.delete(0, END)
-                self.image_output_textbox.insert(0, settings["output_path"])
-            else:
-                # First check if the folder exists
-                if os.path.isdir(settings["output_path"]):
-                    print("Settings successfully loaded!")
-                    self.image_output_checkbutton_var.set(False)
-                    self.image_output_textbox.delete(0, END)
-                    self.image_output_textbox.insert(0, settings["output_path"])
-                else:
-                    print("Directory not found! Program will set the output directory to default!")
-                    Mbox("Warning", "Directory not found! Program will set the output directory to default!", 2)
-                    status, details = fJson.setDefault()
-                    if status:
-                        Mbox("Success", details, 0)
-                    else: # Error should not happen but just in case
-                        Mbox("Error", details, 2)
+        self.filemenu2 = Menu(self.menubar, tearoff=0)
+        self.filemenu2.add_command(label="Setting", command=self.open_Setting) # Open Setting Window
+        self.filemenu2.add_command(label="Output", command=self.open_Output) # Open Setting Window
+        self.menubar.add_cascade(label="View", menu=self.filemenu2)
 
-                    status, details = fJson.loadSetting()
-                    self.image_output_textbox.delete(0, END)
-                    self.image_output_textbox.insert(0, details["output_path"])
-        else: # Error should not happen but just in case
-            print("Error: Cannot load settings")
-            Mbox("Error", settings, 2)
+        self.filemenu3 = Menu(self.menubar, tearoff=0)
+        self.filemenu3.add_command(label="Tutorial", command=self.tutorial) # Open Tutorial Window
+        self.filemenu3.add_command(label="About", command=self.about) # Open About Window
+        self.filemenu3.add_separator()
+        self.filemenu3.add_command(label="Open GitHub Repo", command=lambda aurl="https://github.com/Dadangdut33/Screen-Translate":OpenUrl(aurl)) # Exit Application
+        self.menubar.add_cascade(label="Help", menu=self.filemenu3)
 
-        # Create a button for save settings
-        self.save_button = ttk.Button(self.bottomFrame, text="Save", command=self.save_Settings)
-        self.save_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
 
-        # Create a button for set settings to default
-        self.default_button = ttk.Button(self.bottomFrame, text="Set to Default", command=self.set_Default)
-        self.default_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
+        self.root.config(menu=self.menubar)
 
-        # Create a button for copy currently set path
-        self.copy_button = ttk.Button(self.bottomFrame, text="Copy Path", command=self.copy_Path)
-        self.copy_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
+        # File Menu
 
         # Initiation
         self.iniate_Elements()
 
+    # -------------------------------------------------
+    # Functions
+    # Open the settings window
+    def open_Settings(self):
+        self.settings_window.show()
 
+    # Menubar
+    def always_on_top(self):
+        if self.alwaysOnTop:
+            self.alwaysOnTop = False
+            self.root.wm_attributes('-topmost', False)
+        else:
+            self.alwaysOnTop = True
+            self.root.wm_attributes('-topmost', True)
 
-setting = SettingUI()
-setting.root.mainloop()
+    # Initiation
+    def iniate_Elements(self):
+        print("Initiating elements")
+
+    # on close
+    def on_closing(self):
+        if Mbox("Confirmation", "Are you sure you want to exit?", 3):
+            self.root.destroy()
+            exit()        
+
+    # Open the settings window
+    def open_Setting(self):
+        self.settings_window.show()
+
+    # Open the output folder
+    def open_Output(self):
+        settings = fJson.readSetting()
+        if settings['output_folder'] == "default":
+            print("Default output folder")
+            startfile(fJson.getDefaultSetting())
+        else:
+            print("Custom output folder")
+            startfile(settings['output_path'])
+
+    # About
+    def about(self):
+        Mbox("About", "Ez Upscale\nVersion: 1.0\nAuthor:\n-Fauzan Farhan Antoro\n-Muhammad Hanief Mulfadinar", 0)
+
+    # Tutorial
+    def tutorial(self):
+        Mbox("Tutorial", "Tutorial", 0)
+
+if __name__ == "__main__":
+    # setting = SettingUI()
+    # setting.root.mainloop()
+    main = MainWindow()
+    main.root.mainloop()
