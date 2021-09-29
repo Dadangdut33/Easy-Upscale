@@ -10,6 +10,7 @@ from resource.Mbox import Mbox
 import webbrowser
 import subprocess
 import pyperclip
+import imghdr
 
 # Create a public jsonHandler object
 fJson = JsonHandler()
@@ -19,10 +20,14 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Public function
 def console():
-    print("-" * 80)
-    print("Debugging window")
-    print("Use The GUI Window to start upscaling")
-    print("This window is for debugging purposes")
+    print("=" * 70)
+    print("|\t\t\t   W E L C O M E\t\t\t     |")
+    print("=" * 70)
+    print("|\t\t\t  Debugging window\t\t\t     |")
+    print("|\t\tUse The GUI Window to start upscaling\t\t     |")
+    print("|\t\tThis window is for debugging purposes\t\t     |")
+    print("=" * 70)
+
 
 def startfile(filename):
   try:
@@ -44,11 +49,12 @@ def allowedKey(event):
     else:
         return "break"
 
-def getImgDimensions(img):
+def getImgDimensions_Type(img):
     image = Image.open(img)
     w, h = image.size
+    type = imghdr.what(img)
 
-    return f"{w} x {h}"
+    return f"{w} x {h} - {type}"
 
 # ----------------------------------------------------------------
 # SettingUI
@@ -263,17 +269,14 @@ class MainWindow:
         # Frames
         # Top Frame
         # 1st frame for image input
-        self.firstFrame = Frame(self.root)
+        self.firstFrame = ttk.LabelFrame(self.root, text="• Input Image")
         self.firstFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
-        
+                
         self.firstFrameContent = Frame(self.firstFrame)
         self.firstFrameContent.pack(side=TOP, fill=X, expand=False)
-        
-        self.firstFrameContent_2 = Frame(self.firstFrame)
-        self.firstFrameContent_2.pack(side=TOP, fill=X, expand=False)
 
         # 2nd frame for upscale settings
-        self.secondFrame = Frame(self.root)
+        self.secondFrame = ttk.LabelFrame(self.root, text="• Upscale Settings")
         self.secondFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
 
         self.secondFrameContent = Frame(self.secondFrame)
@@ -285,45 +288,65 @@ class MainWindow:
         self.secondFrameContent_3 = Frame(self.secondFrame)
         self.secondFrameContent_3.pack(side=TOP, fill=X, expand=False)
 
-        # Bottom Frame
-        self.bottomFrame = Frame(self.root)
-        self.bottomFrame.pack(side=BOTTOM, fill=BOTH, expand=False)
+        self.secondFrameContent_4 = Frame(self.secondFrame)
+        self.secondFrameContent_4.pack(side=TOP, fill=X, expand=False)
+
+        # 3rd frame for the queue and the button
+        self.thirdFrame = ttk.LabelFrame(self.root, text="• Queue")
+        self.thirdFrame.pack(side=TOP, fill=X, expand=False)
 
         # ----------------------------------------------------------------
         # Queue Frame / 1st frame
-        self.queueFrame = ttk.Frame(self.bottomFrame)
+        self.queueFrame = ttk.Frame(self.thirdFrame)
         self.queueFrame.pack(side=TOP, fill=BOTH, expand=True)
 
-        # Create a label for image textbox
-        self.image_textbox_label = Label(self.firstFrameContent, text="Image Path:")
-        self.image_textbox_label.pack(side=LEFT, padx=5, pady=5)
-
         # Create a textbox for image path
-        self.image_path_textbox = Entry(self.firstFrameContent_2)
+        self.image_path_textbox = Entry(self.firstFrameContent)
         self.image_path_textbox.pack(side=LEFT, fill=X, expand=True, padx=5, pady=5)
         self.image_path_textbox.bind("<Key>", lambda event: allowedKey(event)) # Disable textbox input
 
         # Create a button for image to browse image
-        self.browse_button = Button(self.firstFrameContent_2, text="Browse", command=self.browse_Image)
+        self.browse_button = Button(self.firstFrameContent, text="Browse", command=self.browse_Image)
         self.browse_button.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for clear textbox
-        self.clear_button = Button(self.firstFrameContent_2, text="Clear", command=self.clear_Textbox)
+        self.clear_button = Button(self.firstFrameContent, text="Clear", command=self.clear_Textbox)
         self.clear_button.pack(side=LEFT, padx=5, pady=5)
 
         # ----------------------------------------------------------------
         # Settings Frame / 2nd frame
         # Create a label for image name
-        self.image_chosen_label = Label(self.secondFrameContent, text="Image Name: ")
+        self.image_chosen_label = Label(self.secondFrameContent, text="Image Name : ")
         self.image_chosen_label.pack(side=LEFT, padx=5, pady=5)
 
         # Create a label for image dimensions
-        self.image_dimensions_label = Label(self.secondFrameContent_2, text="Image Dimensions: ")
-        self.image_dimensions_label.pack(side=LEFT, padx=5, pady=5)
+        self.image_dimensions_type_label = Label(self.secondFrameContent_2, text="Image Dimensions - Type : ")
+        self.image_dimensions_type_label.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a label for model choosing
+        self.model_choosing_label = Label(self.secondFrameContent_3, text="Model  : ")
+        self.model_choosing_label.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a combobox for model choosing
+        self.model_choosing_combobox = ttk.Combobox(self.secondFrameContent_3, state="readonly")
+        self.model_choosing_combobox.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a label for scaling options
+        self.scaling_options_label = Label(self.secondFrameContent_3, text="Scale     :  ")
+        self.scaling_options_label.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a combobox for scaling options
+        self.scaling_options_combobox = ttk.Combobox(self.secondFrameContent_3, state="readonly")
+        self.scaling_options_combobox.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a checkbox for remove noise or not
+        self.remove_noise_var = BooleanVar()
+        self.remove_noise_checkbox = Checkbutton(self.secondFrameContent_3, text="Remove Noise", variable=self.remove_noise_var)
+        self.remove_noise_checkbox.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for image to upscale
-        self.upscale_button = Button(self.secondFrameContent_3, text="Upscale", command=self.upscale_Image)
-        self.upscale_button.pack(side=LEFT, padx=5, pady=5)
+        self.add_to_queue_button = Button(self.secondFrameContent_4, text="Add to queue", command=self.upscale_Image)
+        self.add_to_queue_button.pack(side=LEFT, expand=True, fill=X, padx=5, pady=5)
 
         # Menubar
         self.menubar = Menu(self.root)
@@ -368,7 +391,17 @@ class MainWindow:
 
     # Initiation
     def iniate_Elements(self):
-        print("Initiating elements")
+        # If image is inputted then make the upscale options enabled, else disable it
+        if self.image_path_textbox.get() != "":
+            self.model_choosing_combobox["state"] = "readonly"
+            self.scaling_options_combobox["state"] = "readonly"
+            self.remove_noise_checkbox["state"] = "normal"
+            self.add_to_queue_button["state"] = "normal"
+        else:
+            self.model_choosing_combobox["state"] = "disabled"
+            self.scaling_options_combobox["state"] = "disabled"
+            self.remove_noise_checkbox["state"] = "disabled"
+            self.add_to_queue_button["state"] = "disabled"
 
     # on close
     def on_closing(self):
@@ -398,10 +431,6 @@ class MainWindow:
     def tutorial(self):
         Mbox("Tutorial", "Tutorial", 0)
 
-    # Upscale Image
-    def upscale_Image(self):
-        pass
-
     # Browse Image
     def browse_Image(self):
         self.image_path = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(
@@ -413,18 +442,26 @@ class MainWindow:
 
             # Update the label
             self.image_chosen_label.config(text="Image Name: " + getImgName(self.image_path))
-            self.image_dimensions_label.config(text="Image Dimensions: " + getImgDimensions(self.image_path))
+            self.image_dimensions_type_label.config(text="Image Dimensions - Type: " + getImgDimensions_Type(self.image_path))
 
+            # Initiate elements
+            self.iniate_Elements()
 
     # Clear Textbox
     def clear_Textbox(self):
         self.image_path_textbox.delete(0, END)
         # Update the label
         self.image_chosen_label.config(text="Image Name: ")
-        self.image_dimensions_label.config(text="Image Dimensions: ")
+        self.image_dimensions_type_label.config(text="Image Dimensions - Type: ")
+
+        # Initiate elements
+        self.iniate_Elements()
+
+    # Upscale Image
+    def upscale_Image(self):
+        pass
 
 if __name__ == "__main__":
-    # setting = SettingUI()
-    # setting.root.mainloop()
+    console()
     main = MainWindow()
     main.root.mainloop()
