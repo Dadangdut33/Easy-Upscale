@@ -9,7 +9,8 @@ default_img_path = os.path.join(dir_path, '../output/')
 # Default Setting
 default_Setting = {
     "output_folder": "default", # If default, then output is default_img_path, output path not written in Setting.json
-    "output_path": "", 
+    "output_path": "",
+    "max_queue": 50
 }
 
 class JsonHandler:
@@ -84,5 +85,5 @@ class JsonHandler:
     def readSetting(self):
         return self.settingsCache
 
-    def getDefaultSetting(self):
+    def getDefaultImgPath(self):
         return default_img_path

@@ -14,7 +14,7 @@ class SettingUI():
     def __init__(self):
         self.root = Tk()
         self.root.title("Settings")
-        self.root.geometry("500x150")
+        self.root.geometry("500x250")
         self.root.wm_attributes('-topmost', False) # Keep on top or not
         self.root.wm_withdraw()
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -28,6 +28,15 @@ class SettingUI():
         
         self.firstFrameContent_2 = Frame(self.firstFrame)
         self.firstFrameContent_2.pack(side=TOP, fill=X, expand=False)
+
+        self.secondFrame = ttk.LabelFrame(self.root, text="• Queue Settings")
+        self.secondFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
+
+        self.secondFrameContent = Frame(self.secondFrame)
+        self.secondFrameContent.pack(side=TOP, fill=X, expand=False)
+
+        self.secondFrameContent_2 = Frame(self.secondFrame)
+        self.secondFrameContent_2.pack(side=TOP, fill=X, expand=False)
 
         self.bottomFrame = Frame(self.root)
         self.bottomFrame.pack(side=BOTTOM, fill=BOTH, expand=False)
@@ -48,6 +57,21 @@ class SettingUI():
         self.image_output_button = ttk.Button(self.firstFrameContent_2, text="Browse", command=self.folder_Dialog)
         self.image_output_button.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
 
+        # Create a label for spinbox
+        self.spinbox_label = ttk.Label(self.secondFrameContent, text="Max Queue Size : ")
+        self.spinbox_label.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
+
+        # Create a spinbox for queue size
+        self.validateDigits = (self.root.register(self.validateSpinBox), '%P')
+        self.queue_spinbox_var = IntVar(self.root)
+        self.queue_spinbox = Spinbox(self.secondFrameContent, from_=1, to=100, width=20, textvariable=self.queue_spinbox_var)
+        self.queue_spinbox.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
+        self.queue_spinbox.configure(validate='key', validatecommand=self.validateDigits)
+
+        # Info about the queue size
+        self.queue_info = Label(self.secondFrameContent_2, text="Changes made on max queue size will be effective on next program startup", font=("Segoe UI", 8), foreground="red")
+        self.queue_info.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
+        
         # Read default settings using the functions in jsonHandling
         setting_Status, settings = fJson.loadSetting()
         if setting_Status == True:
@@ -76,6 +100,9 @@ class SettingUI():
                     status, details = fJson.loadSetting()
                     self.image_output_textbox.delete(0, END)
                     self.image_output_textbox.insert(0, details["output_path"])
+
+            # Spinbox
+            self.queue_spinbox_var.set(settings["max_queue"])
         else: # Error should not happen but just in case
             print("Error: Cannot load settings")
             Mbox("Error", settings, 2)
@@ -121,12 +148,16 @@ class SettingUI():
     def on_closing(self):
         self.root.wm_withdraw()
 
+    # Spinbox validation
+    def validateSpinBox(self, event):
+        return event.isdigit()
+
     # Initiate all the elements
     def iniate_Elements(self):
         self.image_output_textbox.delete(0, END)
         self.image_output_textbox.insert(0, fJson.readSetting()["output_path"].replace(r'\resource\..', '').replace('/', '\\'))
         if self.image_output_checkbutton_var.get() == True:
-            self.image_output_textbox.insert(0, fJson.getDefaultSetting().replace(r'\resource\..', '').replace('/', '\\'))
+            self.image_output_textbox.insert(0, fJson.getDefaultImgPath().replace(r'\resource\..', '').replace('/', '\\'))
             self.image_output_textbox.config(state=DISABLED)
             self.image_output_button.config(state=DISABLED)
         else:
@@ -138,7 +169,7 @@ class SettingUI():
         if self.image_output_checkbutton_var.get() == True:
             # Reset textbox to default
             self.image_output_textbox.delete(0, END)
-            self.image_output_textbox.insert(0, fJson.getDefaultSetting().replace(r'\resource\..', '').replace('/', '\\'))
+            self.image_output_textbox.insert(0, fJson.getDefaultImgPath().replace(r'\resource\..', '').replace('/', '\\'))
 
             # Change state to disabled
             self.image_output_textbox.config(state=DISABLED)
@@ -149,30 +180,31 @@ class SettingUI():
     
     # Save settings to json file
     def save_Settings(self):
+        settings = {}
         if self.image_output_checkbutton_var.get() == True: # If checkbox is checked
-            status, details = fJson.setDefault()
+            settings = {
+                "output_folder": "default",
+                "output_path": fJson.getDefaultImgPath(),
+                "max_queue": self.queue_spinbox_var.get()
+            }
+        else:
+            settings = {
+                "output_folder": "custom",
+                "output_path": self.image_output_textbox.get(),
+                "max_queue": self.queue_spinbox_var.get()
+            }
+    
+        # Check if the folder exists
+        if os.path.isdir(settings["output_path"]):
+            status, details = fJson.writeSetting(settings)
             if status:
-                print("Setting has been changed successfully")
-                Mbox("Success", "Setting has been changed successfully", 0)
+                print(details)
+                Mbox("Success", details, 0)
                 self.iniate_Elements()
             else:
                 Mbox("Error", details, 2)
         else:
-            settings = {
-                "output_folder": "custom",
-                "output_path": self.image_output_textbox.get()
-            }
-            # Check if the folder exists
-            if os.path.isdir(settings["output_path"]):
-                status, details = fJson.writeSetting(settings)
-                if status:
-                    print(details)
-                    Mbox("Success", details, 0)
-                    self.iniate_Elements()
-                else:
-                    Mbox("Error", details, 2)
-            else:
-                Mbox("Error", "The folder does not exist", 2)
+            Mbox("Error", "The folder does not exist", 2)
 
     # Copy currently selected path to clipboard
     def copy_Path(self):

@@ -49,7 +49,10 @@ class MainWindow:
     def __init__(self):
         self.root = Tk()
         self.settings_window = SettingUI()
-        self.upscale_Queue = Circular_Q(50) # Max image pool is 50
+
+        # Load settings
+        status, settings = fJson.loadSetting() # Ignore status
+        self.upscale_Queue = Circular_Q(settings['max_queue'])
         self.root.title("Ez Upscale")
         self.root.geometry("700x500")
         self.alwaysOnTop = False
@@ -253,12 +256,11 @@ class MainWindow:
 
     # Open the output folder
     def open_Output(self):
+        print("Opened output folder")
         settings = fJson.readSetting()
         if settings['output_folder'] == "default":
-            print("Default output folder")
-            startfile(fJson.getDefaultSetting())
+            startfile(fJson.getDefaultImgPath())
         else:
-            print("Custom output folder")
             startfile(settings['output_path'])
 
     # About
