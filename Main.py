@@ -1,6 +1,7 @@
 import os
 from tkinter import *
 from tkinter import filedialog
+from PIL import Image
 import tkinter.ttk as ttk
 from resource.JsonHandling import JsonHandler
 from resource.Upscale import Upscale, getImgName
@@ -12,6 +13,9 @@ import pyperclip
 
 # Create a public jsonHandler object
 fJson = JsonHandler()
+
+# Public var
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Public function
 def console():
@@ -28,6 +32,23 @@ def startfile(filename):
 
 def OpenUrl(url):
     webbrowser.open_new(url)
+
+def allowedKey(event):
+    key = event.keysym
+    if key.lower() in ['left', 'right']: # Arrow left right
+        return
+    elif (12 == event.state and key == 'a'):
+        return
+    elif (12 == event.state and key == 'c'): 
+        return
+    else:
+        return "break"
+
+def getImgDimensions(img):
+    image = Image.open(img)
+    w, h = image.size
+
+    return f"{w} x {h}"
 
 # ----------------------------------------------------------------
 # SettingUI
@@ -65,7 +86,7 @@ class SettingUI():
         # Create a textbox for image output folder
         self.image_output_textbox = ttk.Entry(self.firstFrameContent_2)
         self.image_output_textbox.pack(side=LEFT, fill=X, expand=True, padx=5, pady=5)
-        self.image_output_textbox.bind("<Key>", lambda event: "break") # Disable the textbox to input
+        self.image_output_textbox.bind("<Key>", lambda event: allowedKey(event)) # Disable textbox input
 
         # Create a button for image output folder
         self.image_output_button = ttk.Button(self.firstFrameContent_2, text="Browse", command=self.folder_Dialog)
@@ -227,7 +248,6 @@ class SettingUI():
 
             self.iniate_Elements()
 
-
 class MainWindow:
     # -------------------------------------------------
     # Constructor
@@ -236,12 +256,13 @@ class MainWindow:
         self.settings_window = SettingUI()
         self.image_Pool = Circular_Q(50) # Max image pool is 50
         self.root.title("Ez Upscale")
-        self.root.geometry("500x150")
+        self.root.geometry("700x500")
         self.alwaysOnTop = False
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         # Frames
         # Top Frame
+        # 1st frame for image input
         self.firstFrame = Frame(self.root)
         self.firstFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
         
@@ -251,16 +272,58 @@ class MainWindow:
         self.firstFrameContent_2 = Frame(self.firstFrame)
         self.firstFrameContent_2.pack(side=TOP, fill=X, expand=False)
 
+        # 2nd frame for upscale settings
+        self.secondFrame = Frame(self.root)
+        self.secondFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
+
+        self.secondFrameContent = Frame(self.secondFrame)
+        self.secondFrameContent.pack(side=TOP, fill=X, expand=False)
+
+        self.secondFrameContent_2 = Frame(self.secondFrame)
+        self.secondFrameContent_2.pack(side=TOP, fill=X, expand=False)
+
+        self.secondFrameContent_3 = Frame(self.secondFrame)
+        self.secondFrameContent_3.pack(side=TOP, fill=X, expand=False)
+
+        # Bottom Frame
         self.bottomFrame = Frame(self.root)
         self.bottomFrame.pack(side=BOTTOM, fill=BOTH, expand=False)
 
-        # Queue Frame
+        # ----------------------------------------------------------------
+        # Queue Frame / 1st frame
         self.queueFrame = ttk.Frame(self.bottomFrame)
         self.queueFrame.pack(side=TOP, fill=BOTH, expand=True)
 
-        # Create a button for image to text conversion
-        self.convert_button = ttk.Button(self.firstFrameContent, text="Convert")
-        self.convert_button.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
+        # Create a label for image textbox
+        self.image_textbox_label = Label(self.firstFrameContent, text="Image Path:")
+        self.image_textbox_label.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a textbox for image path
+        self.image_path_textbox = Entry(self.firstFrameContent_2)
+        self.image_path_textbox.pack(side=LEFT, fill=X, expand=True, padx=5, pady=5)
+        self.image_path_textbox.bind("<Key>", lambda event: allowedKey(event)) # Disable textbox input
+
+        # Create a button for image to browse image
+        self.browse_button = Button(self.firstFrameContent_2, text="Browse", command=self.browse_Image)
+        self.browse_button.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a button for clear textbox
+        self.clear_button = Button(self.firstFrameContent_2, text="Clear", command=self.clear_Textbox)
+        self.clear_button.pack(side=LEFT, padx=5, pady=5)
+
+        # ----------------------------------------------------------------
+        # Settings Frame / 2nd frame
+        # Create a label for image name
+        self.image_chosen_label = Label(self.secondFrameContent, text="Image Name: ")
+        self.image_chosen_label.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a label for image dimensions
+        self.image_dimensions_label = Label(self.secondFrameContent_2, text="Image Dimensions: ")
+        self.image_dimensions_label.pack(side=LEFT, padx=5, pady=5)
+
+        # Create a button for image to upscale
+        self.upscale_button = Button(self.secondFrameContent_3, text="Upscale", command=self.upscale_Image)
+        self.upscale_button.pack(side=LEFT, padx=5, pady=5)
 
         # Menubar
         self.menubar = Menu(self.root)
@@ -284,11 +347,7 @@ class MainWindow:
         self.filemenu3.add_command(label="Open GitHub Repo", command=lambda aurl="https://github.com/Dadangdut33/Screen-Translate":OpenUrl(aurl)) # Exit Application
         self.menubar.add_cascade(label="Help", menu=self.filemenu3)
 
-
         self.root.config(menu=self.menubar)
-
-        # File Menu
-
         # Initiation
         self.iniate_Elements()
 
@@ -338,6 +397,31 @@ class MainWindow:
     # Tutorial
     def tutorial(self):
         Mbox("Tutorial", "Tutorial", 0)
+
+    # Upscale Image
+    def upscale_Image(self):
+        pass
+
+    # Browse Image
+    def browse_Image(self):
+        self.image_path = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(
+            ("image files", "*.jpg"), ('image files', '*.png'), ('image files', '*.jpeg'), # Allow images only
+        ))
+        if self.image_path != "":
+            self.image_path_textbox.delete(0, END)
+            self.image_path_textbox.insert(0, self.image_path)
+
+            # Update the label
+            self.image_chosen_label.config(text="Image Name: " + getImgName(self.image_path))
+            self.image_dimensions_label.config(text="Image Dimensions: " + getImgDimensions(self.image_path))
+
+
+    # Clear Textbox
+    def clear_Textbox(self):
+        self.image_path_textbox.delete(0, END)
+        # Update the label
+        self.image_chosen_label.config(text="Image Name: ")
+        self.image_dimensions_label.config(text="Image Dimensions: ")
 
 if __name__ == "__main__":
     # setting = SettingUI()
