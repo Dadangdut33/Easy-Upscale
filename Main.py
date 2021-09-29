@@ -12,7 +12,7 @@ from resource.Upscale import Upscale, getImgName
 from resource.Queue import Circular_Q
 from resource.Mbox import Mbox
 from resource.Settings import SettingUI
-from resource.Public import fJson
+from resource.Public import fJson, options, optionsVal
 
 # Public var
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -27,7 +27,6 @@ def console():
     print("|\t\tThis window is for debugging purposes\t\t     |")
     print("=" * 70)
 
-
 def startfile(filename):
   try:
     os.startfile(filename)
@@ -37,12 +36,12 @@ def startfile(filename):
 def OpenUrl(url):
     webbrowser.open_new(url)
 
-def getImgDimensions_Type(img):
+def getImgDetails(img):
     image = Image.open(img)
     w, h = image.size
     type = imghdr.what(img)
 
-    return f"{w} x {h} - {type}"
+    return f"{w} x {h} [{type}]"
 
 class MainWindow:
     # -------------------------------------------------
@@ -86,10 +85,7 @@ class MainWindow:
         self.thirdFrame.pack(side=TOP, fill=X, expand=False)
 
         # ----------------------------------------------------------------
-        # Queue Frame / 1st frame
-        self.queueFrame = ttk.Frame(self.thirdFrame)
-        self.queueFrame.pack(side=TOP, fill=BOTH, expand=True)
-
+        # Browse image
         # Create a textbox for image path
         self.image_path_textbox = Entry(self.firstFrameContent)
         self.image_path_textbox.pack(side=LEFT, fill=X, expand=True, padx=5, pady=5)
@@ -106,11 +102,11 @@ class MainWindow:
         # ----------------------------------------------------------------
         # Settings Frame / 2nd frame
         # Create a label for image name
-        self.image_chosen_label = Label(self.secondFrameContent, text="Image Name : ")
+        self.image_chosen_label = Label(self.secondFrameContent, text="Image Name  : ")
         self.image_chosen_label.pack(side=LEFT, padx=5, pady=5)
 
         # Create a label for image dimensions
-        self.image_dimensions_type_label = Label(self.secondFrameContent_2, text="Image Dimensions - Type : ")
+        self.image_dimensions_type_label = Label(self.secondFrameContent_2, text="Image Details : ")
         self.image_dimensions_type_label.pack(side=LEFT, padx=5, pady=5)
 
         # Create a label for model choosing
@@ -118,16 +114,19 @@ class MainWindow:
         self.model_choosing_label.pack(side=LEFT, padx=5, pady=5)
 
         # Create a combobox for model choosing
-        self.model_choosing_combobox = ttk.Combobox(self.secondFrameContent_3, state="readonly")
+        self.model_choosing_combobox = ttk.Combobox(self.secondFrameContent_3, state="readonly", values=options, background="white")
         self.model_choosing_combobox.pack(side=LEFT, padx=5, pady=5)
+        self.model_choosing_combobox.current(0)
+        self.model_choosing_combobox.bind("<<ComboboxSelected>>", self.change_Model)
 
         # Create a label for scaling options
         self.scaling_options_label = Label(self.secondFrameContent_3, text="Scale     :  ")
         self.scaling_options_label.pack(side=LEFT, padx=5, pady=5)
 
         # Create a combobox for scaling options
-        self.scaling_options_combobox = ttk.Combobox(self.secondFrameContent_3, state="readonly")
+        self.scaling_options_combobox = ttk.Combobox(self.secondFrameContent_3, state="readonly", values=optionsVal[options[0]], background="white")
         self.scaling_options_combobox.pack(side=LEFT, padx=5, pady=5)
+        self.scaling_options_combobox.current(0)
 
         # Create a checkbox for remove noise or not
         self.remove_noise_var = BooleanVar()
@@ -137,6 +136,11 @@ class MainWindow:
         # Create a button for image to upscale
         self.add_to_queue_button = Button(self.secondFrameContent_4, text="Add to queue", command=self.upscale_Image)
         self.add_to_queue_button.pack(side=LEFT, expand=True, fill=X, padx=5, pady=5)
+
+        # ----------------------------------------------------------------
+        # Queue Frame / 3rd frame
+        self.queueFrame = ttk.Frame(self.thirdFrame)
+        self.queueFrame.pack(side=TOP, fill=BOTH, expand=True)
 
         # Menubar
         self.menubar = Menu(self.root)
@@ -218,7 +222,6 @@ class MainWindow:
     # Open the output folder
     def open_Output(self):
         settings = fJson.readSetting()
-        print(settings)
         if settings['output_folder'] == "default":
             print("Default output folder")
             startfile(fJson.getDefaultSetting())
@@ -244,8 +247,8 @@ class MainWindow:
             self.image_path_textbox.insert(0, self.image_path)
 
             # Update the label
-            self.image_chosen_label.config(text="Image Name: " + getImgName(self.image_path))
-            self.image_dimensions_type_label.config(text="Image Dimensions - Type: " + getImgDimensions_Type(self.image_path))
+            self.image_chosen_label.config(text="Image Name  : " + getImgName(self.image_path))
+            self.image_dimensions_type_label.config(text="Image Details : " + getImgDetails(self.image_path))
 
             # Initiate elements
             self.iniate_Elements()
@@ -254,11 +257,24 @@ class MainWindow:
     def clear_Textbox(self):
         self.image_path_textbox.delete(0, END)
         # Update the label
-        self.image_chosen_label.config(text="Image Name: ")
-        self.image_dimensions_type_label.config(text="Image Dimensions - Type: ")
+        self.image_chosen_label.config(text="Image Name  : ")
+        self.image_dimensions_type_label.config(text="Image Details : ")
 
         # Initiate elements
         self.iniate_Elements()
+
+    # Changing model
+    def change_Model(self, event):
+        self.model_name = self.model_choosing_combobox.get()
+        self.oldScale_Get = self.scaling_options_combobox.get()
+        self.newScale = optionsVal[self.model_name]
+        self.scaling_options_combobox['values'] = self.newScale
+        # Search for the old scale, exist or not, if not exist then set select to 0
+        try:
+            indexGet = self.newScale.index(int(self.oldScale_Get))
+            self.scaling_options_combobox.current(indexGet)
+        except Exception as e:
+            self.scaling_options_combobox.current(0)
 
     # Upscale Image
     def upscale_Image(self):
