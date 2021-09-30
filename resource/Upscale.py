@@ -157,9 +157,11 @@ class Upscale:
             # Set status to success
             is_Success = True
         except InvalidScale as e:
+            flag.running_Batch = False
             print(str(e))
             Mbox("Error: Invalid scale", "Invalid scale! Scale must be either 2, 3 or 4", 2)
         except cv2.error as e:
+            flag.running_Batch = False
             if "Can't open" in str(e):
                 # Print error to console
                 print("Error: ")
@@ -169,6 +171,14 @@ class Upscale:
                 # Error popup
                 Mbox("Error: Model not found", "Model not found! Please verify that the model exist in 'models' folder. " + 
                 "If model is lost, you need to download it again!\n\nError details: " + str(e), 2)
+            elif "Insufficient memory" in str(e):
+                # Print error to console
+                print("Error: ")
+                print("Insufficient memory! This usually happen because the picture resolution is too big! This error happened because it literally uses that many memories to start upscaling")
+                print(">> Tips: Use other models")
+
+                # Error popup
+                Mbox("Error: Insufficient memory", "Insufficient memory!\nThis usually happen because the picture resolution is too big! This error happened because it literally uses that many memories to start upscaling\n*Tips: User other models\n\nError details: " + str(e), 2)
             else: 
                 # Print error to console
                 print("Error: ")
@@ -177,6 +187,7 @@ class Upscale:
                 # Error popup
                 Mbox("Error", "Error occured while processing the image.\n\nDetails: " + str(e), 2)
         except Exception as e:
+            flag.running_Batch = False
             # Print error to console
             print(str(e))
 
