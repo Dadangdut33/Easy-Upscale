@@ -4,6 +4,7 @@ import time
 from datetime import timedelta
 from .Loading_Popup import run_func_with_loading_popup
 from .Mbox import Mbox
+from .Public import flag
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Error(Exception):
@@ -50,7 +51,7 @@ class Upscale:
 
     # -------------------------------------------------
     # Upscale
-    def up_type(self, up_type, img, scale, noise_removal, dir_Output): # Fast
+    def up_type(self, up_Type, img_Path, scale, noise_Removal, dir_Output):
         """Upscale the image using ESPCN models, available scale are 2 3 4"""
         # Check directory first
         self.createDirIfGone(dir_Output)
@@ -58,9 +59,9 @@ class Upscale:
         is_Success = False
         startTime = time.time()
         try:
-            print("="*50 + f"\n{up_type} Upscaling.\nScale\t\t: {scale}\nRemove noise\t: {noise_removal}")
+            print("="*50 + f"\n{up_Type} Upscaling.\nScale\t\t: {scale}\nRemove noise\t: {noise_Removal}")
             model = ""
-            modelset = up_type.lower()
+            modelset = up_Type.lower()
             # Models checking
             # -------------------------------------------------
             # ESPCN
@@ -117,28 +118,39 @@ class Upscale:
             print(">> Loading model from: " + pathToModel)
 
             # Upscale
-            imgGet = cv2.imread(img) # read the images
+            imgGet = cv2.imread(img_Path) # read the images
             print('>> Upscaling the image.... Please wait....')
-        
             upscaled = sr.upsample(imgGet) # upscale the input image
+            # Check threads
+            if flag.threads_Running == False:
+                flag.is_Terminating = False
+                is_Success = None # Signaling that it got canceled
+                return is_Success
+
             print('Upscaling complete!')
             upscaled_Time = time.time()
             print(f'Upscaling took {get_time_hh_mm_ss(upscaled_Time - startTime)} seconds')
 
-            if noise_removal:
+            if noise_Removal:
                 # Noise removal
                 print('>> Removing noise.... Please wait....')
                 denoised = cv2.fastNlMeansDenoisingColored(upscaled, None, 10, 10, 7, 21) # denoise the image
                 print('Noise removal complete!')
                 print(f'Denoising took {get_time_hh_mm_ss(time.time() - upscaled_Time)} seconds')
+                
+                # Check threads
+                if flag.threads_Running == False:
+                    flag.is_Terminating = False
+                    is_Success = None # Signaling that it got canceled
+                    return is_Success
 
                 # Save the image
-                outputDir = f"{dir_path}/../output/{getImgName(img)} {scales[scale]} denoised.png"
+                outputDir = f"{dir_path}/../output/{getImgName(img_Path)} {scales[scale]} denoised.png"
                 cv2.imwrite(outputDir, denoised)
                 print(">> Image saved to: " + outputDir)
             else:
                 # Save the image
-                outputDir = f"{dir_path}/../output/{getImgName(img)} {scales[scale]}.png"
+                outputDir = f"{dir_path}/../output/{getImgName(img_Path)} {scales[scale]}.png"
                 cv2.imwrite(outputDir, upscaled)
                 print(">> Image saved to: " + outputDir)
 

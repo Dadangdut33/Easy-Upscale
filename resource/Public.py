@@ -1,11 +1,17 @@
 from .JsonHandling import JsonHandler
 
-fJson = JsonHandler()
+class Flags:
+    def __init__(self):
+        self.threads_Running = False
+        self.is_Terminating = False
 
-options = ["ESPCN", "FSRCNN", "FSRCNN-small", "LapSRN", "EDSR"]
+fJson = JsonHandler()
+flag = Flags()
+
+options = ["ESPCN", "FSRCNN", "FSRCNN-small", "LapSRN"] # EDSR IS TOO SLOW SO ITS REMOVED
 
 optionsVal = {
-    "EDSR": [2, 3, 4],
+    # "EDSR": [2, 3, 4],
     "ESPCN": [2, 3, 4],
     "FSRCNN": [2, 3, 4],
     "FSRCNN-small": [2, 3, 4],

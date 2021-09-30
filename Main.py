@@ -1,4 +1,5 @@
 import os
+from resource.Loading_Popup import run_func_with_loading_popup
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image
@@ -12,7 +13,7 @@ from resource.Upscale import Upscale, getImgName
 from resource.Queue import Circular_Q
 from resource.Mbox import Mbox
 from resource.Settings import SettingUI
-from resource.Public import fJson, options, optionsVal
+from resource.Public import fJson, options, optionsVal, flag
 
 # Public var
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -43,18 +44,26 @@ def getImgDetails(img):
 
     return f"{w} x {h} [{type}]"
 
+def getImgType_Only(img):
+    type = imghdr.what(img)
+    return type
+
 class MainWindow:
     # -------------------------------------------------
     # Constructor
     def __init__(self):
         self.root = Tk()
         self.settings_window = SettingUI()
+        self.upscale = Upscale()
+        self.bounc_speed = 4
+        self.pb_length = 250
+        self.window_title = "Loading..."
 
         # Load settings
         status, settings = fJson.loadSetting() # Ignore status
         self.upscale_Queue = Circular_Q(settings['max_queue'])
         self.root.title("Ez Upscale")
-        self.root.geometry("700x500")
+        self.root.geometry("900x600")
         self.alwaysOnTop = False
         self.root.protocol("WM_DELETE_WINDOW", self.on_Closing)
 
@@ -95,8 +104,9 @@ class MainWindow:
 
         self.thirdFrameContent_3 = Frame(self.thirdFrame) # For treeview
         self.thirdFrameContent_3.pack(side=TOP, fill=BOTH, expand=True)
-        # self.thirdFrameContent_3.columnconfigure(0, weight=1) # Column with treeview
-        # self.thirdFrameContent_3.rowconfigure(0, weight=1) # row with treeview
+
+        self.thirdFrameContent_3_x = Frame(self.thirdFrame)
+        self.thirdFrameContent_3_x.pack(side=TOP, fill=X, expand=False)
 
         # ----------------------------------------------------------------
         # Browse image
@@ -162,11 +172,11 @@ class MainWindow:
         self.upscale_all_button.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for upscale top queue
-        self.upscale_top_button = Button(self.thirdFrameContent_2, text="Upscale top", command=self.upscale_Top)
+        self.upscale_top_button = Button(self.thirdFrameContent_2, text="Upscale top", command=self.upscale_Head)
         self.upscale_top_button.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for remove top queue
-        self.remove_top_button = Button(self.thirdFrameContent_2, text="Remove top", command=self.remove_Top)
+        self.remove_top_button = Button(self.thirdFrameContent_2, text="Remove top", command=self.remove_Head)
         self.remove_top_button.pack(side=LEFT, fill=X, padx=5, pady=5)
 
         # Create a button for clear queue
@@ -174,8 +184,33 @@ class MainWindow:
         self.clear_queue_button.pack(side=LEFT, fill=X, padx=5, pady=5)
         
         # Create a treeview for queue
-        self.tree = ttk.Treeview(self.thirdFrameContent_3, columns=("Image Name", "Image Dimensions", "Model", "Scale", "Remove Noise"))
-        self.tree.pack(side=TOP, expand=True, fill=BOTH, padx=5, pady=5)
+        self.scrollbarY = Scrollbar(self.thirdFrameContent_3, orient=VERTICAL)
+        self.scrollbarY.pack(side=RIGHT, fill=Y)
+        self.scrollbarX = Scrollbar(self.thirdFrameContent_3_x, orient=HORIZONTAL)
+        self.scrollbarX.pack(side=TOP, fill=X)
+
+        self.queue_Table = ttk.Treeview(self.thirdFrameContent_3, columns=("Model", "Scale", "Remove Noise", "Image Info", "Image Name"))
+        self.queue_Table['columns'] = ("Image Name", "Image Info", "Upscale Model", "Scale", "Remove Noise")
+        self.queue_Table.pack(side=LEFT, expand=True, fill=BOTH, padx=5, pady=5)
+
+        self.queue_Table.heading("#0", text="", anchor=CENTER)
+        self.queue_Table.heading("#1", text="Model", anchor=CENTER)
+        self.queue_Table.heading("#2", text="Scale", anchor=CENTER)
+        self.queue_Table.heading("#3", text="Remove Noise", anchor=CENTER)
+        self.queue_Table.heading("#4", text="Image Info", anchor=CENTER)
+        self.queue_Table.heading("#5", text=" Image Name", anchor="w")
+
+        self.queue_Table.column("#0", width=20, stretch=False)
+        self.queue_Table.column("#1", width=90, stretch=False, anchor=CENTER)
+        self.queue_Table.column("#2", width=40, stretch=False, anchor=CENTER)
+        self.queue_Table.column("#3", width=90, stretch=False, anchor=CENTER)
+        self.queue_Table.column("#4", width=120, stretch=False, anchor=CENTER)
+        self.queue_Table.column("#5", width=1000, stretch=False, anchor="w")
+
+        self.scrollbarX.config(command=self.queue_Table.xview)
+        self.scrollbarY.config(command=self.queue_Table.yview)
+        self.queue_Table.config(yscrollcommand=self.scrollbarY.set, xscrollcommand=self.scrollbarX.set)
+        self.queue_Table.bind('<Button-1>', self.handle_click)
 
         # Menubar
         self.menubar = Menu(self.root)
@@ -201,7 +236,8 @@ class MainWindow:
 
         self.root.config(menu=self.menubar)
         # Initiation
-        self.iniate_Elements()
+        self.iniate_Settings_Elements()
+        self.fill_Treeview()
 
     # -------------------------------------------------
     # Functions
@@ -219,7 +255,7 @@ class MainWindow:
             self.root.wm_attributes('-topmost', True)
 
     # Initiation
-    def iniate_Elements(self):
+    def iniate_Settings_Elements(self):
         # If image is inputted then make the upscale options enabled, else disable it
         if self.image_path_textbox.get() != "":
             self.model_choosing_combobox["state"] = "readonly"
@@ -285,7 +321,7 @@ class MainWindow:
             self.image_dimensions_type_label.config(text="Image Details : " + getImgDetails(self.image_path))
 
             # Initiate elements
-            self.iniate_Elements()
+            self.iniate_Settings_Elements()
 
     # Clear Textbox
     def clear_Textbox(self):
@@ -295,7 +331,7 @@ class MainWindow:
         self.image_dimensions_type_label.config(text="Image Details : ")
 
         # Initiate elements
-        self.iniate_Elements()
+        self.iniate_Settings_Elements()
 
     # Changing model
     def change_Model(self, event):
@@ -310,8 +346,34 @@ class MainWindow:
         except Exception as e:
             self.scaling_options_combobox.current(0)
 
+    # Queue table
+    def fill_Treeview(self):
+        self.queue_label.config(text="Total Item in Queue : " + str(self.upscale_Queue.get_Size()))
+
+        # Delete the item in table first
+        for i in self.queue_Table.get_children():
+                self.queue_Table.delete(i)
+
+        queue_Get = self.upscale_Queue.get_Queue()
+        count = 0
+        for queue in queue_Get:
+            # Check if data is none or not, if none then skip
+            if queue is None:
+                continue
+            
+            parentID = count
+            self.queue_Table.insert(parent='', index='end', text='', iid=count, values=(queue[3], queue[4], queue[5], queue[2], queue[1]))
+
+            count += 1
+            # Child
+            self.queue_Table.insert(parent=parentID, index='end', text='', iid=count, values=("", "", "", "Path:", queue[0]))
+
+            count += 1
+
     # Add to queue
     def add_To_Queue(self):
+        if flag.is_Terminating:
+            return
         # Double checking
         # Check if the image is inputted
         if self.image_path_textbox.get() == "":
@@ -334,26 +396,90 @@ class MainWindow:
         # Add to queue
         self.upscale_Queue.enqueue([image_path, getImgName(image_path), getImgDetails(image_path), model_name, scale, remove_noise])
         # Update the label
-        self.queue_label.config(text="Total Item in Queue : " + str(self.upscale_Queue.get_Size()))
 
         # Log the queue to console
         self.upscale_Queue.display()
 
+        # Load the queue to table
+        self.fill_Treeview()
+
+    # Treeviewa behavior
+    def handle_click(self, event):
+        if self.queue_Table.identify_region(event.x, event.y) == "separator":
+            return "break"
+
     # Upscale all
     def upscale_All(self):
+        if flag.is_Terminating:
+            return
         pass
 
     # Upscale top
-    def upscale_Top(self):
-        pass
+    def upscale_Head(self):
+        if flag.is_Terminating:
+            return
+
+        status, headData = self.upscale_Queue.get_Head()
+        if status:
+            # Get the data of the head
+            img_Path = headData[0]
+            up_Type = headData[3]
+            scale = int(headData[4])
+            remove_Noise = headData[5]
+            dir_Output = fJson.readSetting()['output_path']
+
+            # Msg for loading popup
+            noiseRemoved = ' and removing noise' if remove_Noise else ''
+            msg = f'Upscaling {getImgName(img_Path)}.{getImgType_Only(img_Path)}{noiseRemoved}\nusing {up_Type}_x{scale}, please wait...'
+
+            # Upscale the image
+            upscale_status = run_func_with_loading_popup(
+                lambda: self.upscale.up_type(up_Type, img_Path, scale, remove_Noise, dir_Output), msg, self.window_title, self.bounc_speed, self.pb_length
+            )
+
+            # If success
+            if upscale_status == True:
+                status, dequeued_Data = self.upscale_Queue.dequeue()
+                if status:
+                    self.fill_Treeview()
+                    print(">> Image successfully processed")
+                    Mbox("Success", f"Successfully processed {dequeued_Data[1]}.{getImgType_Only(dequeued_Data[0])}", 0)
+            # Canceled by user
+            elif upscale_status == None:
+                print(">> Process canceled by user")
+                Mbox("Canceled", "Upscaling process canceled by user", 1)
+                self.fill_Treeview()
+
+            # Failed is already handled in the upscale class
+            # --------------------------------
+        # Failed to get queue data
+        else:
+            self.fill_Treeview()
+            Mbox("Error", "Failed to upscale image.\nReason: " + headData, 2)
 
     # Remove top
-    def remove_Top(self):
-        pass
+    def remove_Head(self):
+        if flag.is_Terminating:
+            return
+
+        status, data = self.upscale_Queue.dequeue()
+        if status:
+            self.fill_Treeview()
+            Mbox("Success", f"{data[1]}.{getImgType_Only(data[0])} has been removed from queue", 0)
+        else:
+            self.fill_Treeview()
+            Mbox("Error", "Failed to remove the top queue.\nReason: " + data, 2)
 
     # Remove all
     def clear_Queue(self):
-        pass
+        if flag.is_Terminating:
+            return
+
+        status = self.upscale_Queue.clear()
+        if status:
+            self.fill_Treeview()
+            Mbox("Success", "Queue has been cleared successfully", 0)
+            self.upscale_Queue.display()
 
 if __name__ == "__main__":
     console()

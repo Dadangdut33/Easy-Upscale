@@ -3,7 +3,7 @@ from .Mbox import Mbox
 
 class Circular_Q:
     """
-    Class for implementing circular queue, error ui will be thrown from here. Results send back are boolean either success (True) or failure (False).
+    Class for implementing circular queue, error ui will be thrown from here, except for the dequeue and get head.
     """
     def __init__(self, capacity):
         """
@@ -91,6 +91,14 @@ class Circular_Q:
         print("Head position\t:", self.head)
         print("Tail position\t:", self.tail)
 
+    def get_Queue(self):
+        """Get the queue
+
+        Returns:
+            [list]: queue
+        """
+        return self.queue
+
     def enqueue(self, data):
         """Add the data to the tail of the queue
 
@@ -105,9 +113,8 @@ class Circular_Q:
             # Check full
             if self.is_Full(): # size = capacity
                 print("Queue is Full!")
-                Mbox("Queue is Full!", "Queue is full! You cannot add more item!", 1)
-                return
-            # Circular queue does not have overflow condition
+                Mbox("Queue is Full!", "Queue is full! You cannot add any more item!", 1)
+                return is_Success
 
             # Store the data
             self.queue[self.tail] = data
@@ -125,7 +132,7 @@ class Circular_Q:
             return is_Success
             
     def dequeue(self):
-        """Get the data from the head of the queue
+        """Dequeue the head data from the  queue
 
         Returns:
             [boolean, dequeued_data]: [True, data] if success, [False, None] if fail
@@ -134,9 +141,10 @@ class Circular_Q:
         dequeued_Data = None
         try:
             # Check empty
-            if self.is_Empty():
+            if self.is_Empty(): # self.size == 0
                 print("Queue is Empty!")
-                return
+                dequeued_Data = "Queue is empty!"
+                return is_Success, dequeued_Data
 
             # Get the data
             data = self.queue[self.head]
@@ -152,6 +160,33 @@ class Circular_Q:
             is_Success = True
         except Exception as e:
             print("Fail to dequeue!\nReason: " + str(e))
-            Mbox("Fail to dequeue!", "Fail to dequeue! Reason: " + str(e), 2)
+            dequeued_Data = str(e)
         finally:
             return is_Success, dequeued_Data
+
+    def get_Head(self):
+        """Get the data from the head of the queue
+
+        Returns:
+            [boolean, dequeued_data]: [True, data] if success, [False, reason] if fail
+        """
+        is_Success = False
+        head_Data = None
+        try:
+            # Check empty
+            if self.is_Empty(): # self.size == 0
+                print("Queue is Empty!")
+                head_Data = "Queue is empty!"
+                return is_Success, head_Data
+
+            # Get the data
+            data = self.queue[self.head]
+            
+            print("Get head:", data)
+            head_Data = data
+            is_Success = True
+        except Exception as e:
+            print("Fail to get head data!\nReason: " + str(e))
+            head_Data = str(e)
+        finally:
+            return is_Success, head_Data
