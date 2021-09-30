@@ -13,6 +13,6 @@ Aplikasi ini dibuat untuk memenuhi tugas mata kuliah Struktur Data. Konsep aplik
 |---------------------------------------------------|---------------|----------------|-----------|
 | Buat logic untuk meng-upscale image               | Fauzan        | Done           | ✅
 | Buat logic pooling gambar dengan circural queue   | Fauzan        | Done           | ✅
-| Buat gui                                          | Fauzan dan Hanif        | In proggress        | ⬜
-| Implementasi backend dengan frontend gui          | Fauzan dan Hanif        | Waiting        | ⬜
-| Test aplikasi                                     | Fauzan dan Hanif        | Waiting        | ⬜
+| Buat gui                                          | Fauzan dan Hanif        | Done        | ✅
+| Implementasi backend dengan frontend gui          | Fauzan dan Hanif        | Done        | ✅
+| Test aplikasi                                     | Fauzan dan Hanif        | in progress        | ⬜
