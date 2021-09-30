@@ -50,6 +50,7 @@ def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8
             self.msg_lbl.config(text="Terminating process, please wait until it finishes...")
             flag.threads_Running = False
             flag.is_Terminating = True
+            flag.running_Batch = False
             
         def start_bar(self):
             # load bar configuration

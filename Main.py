@@ -231,7 +231,7 @@ class MainWindow:
         self.filemenu3.add_command(label="Tutorial", command=self.tutorial) # Open Tutorial Window
         self.filemenu3.add_command(label="About", command=self.about) # Open About Window
         self.filemenu3.add_separator()
-        self.filemenu3.add_command(label="Open GitHub Repo", command=lambda aurl="https://github.com/Dadangdut33/Screen-Translate":OpenUrl(aurl)) # Exit Application
+        self.filemenu3.add_command(label="Open GitHub Repo", command=lambda aurl="https://github.com/Dadangdut33/sda-3a-06-easy_upscale":OpenUrl(aurl)) # Exit Application
         self.menubar.add_cascade(label="Help", menu=self.filemenu3)
 
         self.root.config(menu=self.menubar)
@@ -412,10 +412,22 @@ class MainWindow:
     def upscale_All(self):
         if flag.is_Terminating:
             return
-        pass
+        
+        flag.running_Batch = True
+        while flag.running_Batch: # Looping the queue
+            self.upscale_Head(True) # Loop the upscale process
+
+            # Check size of queue, if empty then stop
+            if self.upscale_Queue.get_Size() == 0:
+                flag.running_Batch = False
+                break
+        else:
+            flag.running_Batch = False
+            self.fill_Treeview()
 
     # Upscale top
-    def upscale_Head(self):
+    def upscale_Head(self, running_Batch = False):
+        print(flag.is_Terminating)
         if flag.is_Terminating:
             return
 
@@ -442,10 +454,12 @@ class MainWindow:
                 status, dequeued_Data = self.upscale_Queue.dequeue()
                 if status:
                     self.fill_Treeview()
-                    print(">> Image successfully processed")
-                    Mbox("Success", f"Successfully processed {dequeued_Data[1]}.{getImgType_Only(dequeued_Data[0])}", 0)
+                    if not running_Batch:
+                        print(">> Image successfully processed")
+                        Mbox("Success", f"Successfully processed {dequeued_Data[1]}.{getImgType_Only(dequeued_Data[0])}", 0)
             # Canceled by user
             elif upscale_status == None:
+                flag.is_Terminating = False
                 print(">> Process canceled by user")
                 Mbox("Canceled", "Upscaling process canceled by user", 1)
                 self.fill_Treeview()

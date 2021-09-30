@@ -4,6 +4,7 @@ class Flags:
     def __init__(self):
         self.threads_Running = False
         self.is_Terminating = False
+        self.running_Batch = False
 
 fJson = JsonHandler()
 flag = Flags()
