@@ -9,6 +9,12 @@ class Circular_Q:
         """
         Initialize the queue
         """
+        if capacity > 200:
+            capacity = 200
+        
+        if capacity < 1:
+            capacity = 1
+
         self.queue = [None] * capacity
         self.head = 0
         self.tail = 0
