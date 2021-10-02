@@ -158,10 +158,15 @@ class Upscale:
             is_Success = True
         except InvalidScale as e:
             flag.running_Batch = False
+            flag.is_Terminating = False
+            flag.is_error = True
+            # Print the error message
             print(str(e))
             Mbox("Error: Invalid scale", "Invalid scale! Scale must be either 2, 3 or 4", 2)
         except cv2.error as e:
             flag.running_Batch = False
+            flag.is_Terminating = False
+            flag.is_error = True
             if "Can't open" in str(e):
                 # Print error to console
                 print("Error: ")
@@ -174,11 +179,11 @@ class Upscale:
             elif "Insufficient memory" in str(e):
                 # Print error to console
                 print("Error: ")
-                print("Insufficient memory! This usually happen because the picture resolution is too big! This error happened because it literally uses that many memories to start upscaling")
-                print(">> Tips: Use other models")
+                print("Insufficient memory! This usually happen because the image resolution is too big! This error happened because it literally takes that many memories to start upscaling")
+                print(">> Tips: Try to use other models")
 
                 # Error popup
-                Mbox("Error: Insufficient memory", "Insufficient memory!\nThis usually happen because the picture resolution is too big! This error happened because it literally uses that many memories to start upscaling\n*Tips: User other models\n\nError details: " + str(e), 2)
+                Mbox("Error: Insufficient memory", "Insufficient memory!\nThis usually happen because the image resolution is too big! This error happened because it literally takes that many memories to start upscaling\n*Tips: Try to use other models\n\nError details: " + str(e), 2)
             else: 
                 # Print error to console
                 print("Error: ")
@@ -188,6 +193,8 @@ class Upscale:
                 Mbox("Error", "Error occured while processing the image.\n\nDetails: " + str(e), 2)
         except Exception as e:
             flag.running_Batch = False
+            flag.is_Terminating = False
+            flag.is_error = True
             # Print error to console
             print(str(e))
 

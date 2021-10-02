@@ -5,6 +5,8 @@ class Flags:
         self.threads_Running = False
         self.is_Terminating = False
         self.running_Batch = False
+        self.is_error = False
+        self.mode_batch = False
 
 fJson = JsonHandler()
 flag = Flags()

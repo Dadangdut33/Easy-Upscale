@@ -44,6 +44,11 @@ def getImgDetails(img):
 
     return f"{w} x {h} [{type}]"
 
+def getImg_W_H(img):
+    image = Image.open(img)
+    w, h = image.size
+    return w, h
+
 def getImgType_Only(img):
     type = imghdr.what(img)
     return type
@@ -60,7 +65,7 @@ class MainWindow:
         self.window_title = "Loading..."
 
         # Load settings
-        status, settings = fJson.loadSetting() # Ignore status
+        settings = fJson.readSetting() # Settings are loaded first at SettingUI so now only need to read the settings
         self.upscale_Queue = Circular_Q(settings['max_queue'])
         self.root.title("Ez Upscale")
         self.root.geometry("900x600")
@@ -388,6 +393,19 @@ class MainWindow:
             Mbox("Error", "Please input the scale", 0)
             return
 
+        # Check if the image is exist or not
+        if not os.path.isfile(self.image_path_textbox.get()):
+            Mbox("Error", "Image not found", 0)
+            return
+        
+        # Check img resolution, if more than 1920px then show warning
+        w, h = getImg_W_H(self.image_path_textbox.get())
+        if w > 1920 or h > 1080:
+            # Ask for confirmation to continue if image inpujtted is already hd
+            if not Mbox("Warning", "The image resolution seems to be at HD already, do you still want to continue?\n\n" + 
+                    "*Please note that you might not be able to upscale it any further as it would need more memory resource to process the image", 3):
+                return
+
         # Get the data
         image_path = self.image_path_textbox.get()
         model_name = self.model_choosing_combobox.get()
@@ -414,16 +432,24 @@ class MainWindow:
             return
         
         flag.running_Batch = True
+        flag.mode_batch = True
+        count = 0
         while flag.running_Batch: # Looping the queue
             self.upscale_Head(True) # Loop the upscale process
-
+            count += 1
             # Check size of queue, if empty then stop
             if self.upscale_Queue.get_Size() == 0:
                 flag.running_Batch = False
+                flag.mode_batch = False
                 break
-        else:
-            flag.running_Batch = False
-            self.fill_Treeview()
+        if not flag.is_error: # If there is no error then show success message
+            print(">> Batch Upscale process completed, Successfully processes " + str(count) + " images")
+            Mbox("Batch Upscale process completed", "Successfully processes " + str(count) + " images", 0)
+        else: # If there is error then show error message
+            flag.is_error = False
+            flag.mode_batch = False
+            Mbox("Error", "Upscaling process is canceled because of an error", 1)
+
 
     # Upscale top
     def upscale_Head(self, running_Batch = False):
@@ -462,6 +488,13 @@ class MainWindow:
                 flag.is_Terminating = False
                 print(">> Process canceled by user")
                 Mbox("Canceled", "Upscaling process canceled by user", 1)
+                self.fill_Treeview()
+
+            # Error
+            if flag.is_error == True and not flag.mode_batch:
+                flag.is_error = False
+                print(">> Error")
+                Mbox("Error", "Upscaling process is canceled because of an error", 1)
                 self.fill_Treeview()
 
             # Failed is already handled in the upscale class
