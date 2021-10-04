@@ -99,6 +99,10 @@ class Upscale:
                     raise InvalidScale("Invalid scale! Available scale for FSRCNN-small are either 2, 3, or 4")
                 model = scales[scale]
             # ---------------------------------------------------
+            # None
+            elif modelset == "none":
+                model = None
+
             else: # Invalid type
                 Mbox("Error", "Invalid upscale type!\nAvailable upscale type are:\nESPCN\nEDSR\nLapSRN\nFSRCNN\nFSRCNN-small", 2)
                 return is_Success
@@ -107,29 +111,36 @@ class Upscale:
             if "small" in modelset:
                 modelset = "fsrcnn"
 
-            # Super resolution
-            sr = cv2.dnn_superres.DnnSuperResImpl_create()
+            if model is not None:
+                # Check threads
+                if flag.threads_Running == False:
+                    flag.is_Terminating = False
+                    is_Success = None # Signaling that it got canceled
+                    return is_Success
+                # Run the upscale
+                # Super resolution
+                sr = cv2.dnn_superres.DnnSuperResImpl_create()
 
-            # Model
-            pathToModel = os.path.join(dir_path + "/../models/" + model + ".pb")
-            sr.readModel(pathToModel) # Load the model
-            sr.setModel(modelset, scale) # set the model by passing the value and the upsampling ratio
+                # Model
+                pathToModel = os.path.join(dir_path + "/../models/" + model + ".pb")
+                sr.readModel(pathToModel) # Load the model
+                sr.setModel(modelset, scale) # set the model by passing the value and the upsampling ratio
 
-            print(">> Loading model from: " + pathToModel)
+                print(">> Loading model from: " + pathToModel)
 
-            # Upscale
-            imgGet = cv2.imread(img_Path) # read the images
-            print('>> Upscaling the image.... Please wait....')
-            upscaled = sr.upsample(imgGet) # upscale the input image
-            # Check threads
-            if flag.threads_Running == False:
-                flag.is_Terminating = False
-                is_Success = None # Signaling that it got canceled
-                return is_Success
+                # Upscale
+                imgGet = cv2.imread(img_Path) # read the image
+                print('>> Upscaling the image.... Please wait....')
+                upscaled = sr.upsample(imgGet) # upscale the input image
+                # Check threads
+                if flag.threads_Running == False:
+                    flag.is_Terminating = False
+                    is_Success = None # Signaling that it got canceled
+                    return is_Success
 
-            print('Upscaling complete!')
-            upscaled_Time = time.time()
-            print(f'Upscaling took {get_time_hh_mm_ss(upscaled_Time - startTime)} seconds')
+                print('Upscaling complete!')
+                upscaled_Time = time.time()
+                print(f'Upscaling took {get_time_hh_mm_ss(upscaled_Time - startTime)} seconds')
 
             if noise_Removal:
                 # Noise removal
