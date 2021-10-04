@@ -20,9 +20,9 @@ class JsonHandler:
     # Create dir if not exists
     def createDirIfGone(self):
         # Will create the dir if not exists
-        if not os.path.exists(setting_dir_path):
+        if not os.path.exists(jsons_path):
             try:
-                os.makedirs(setting_dir_path)
+                os.makedirs(jsons_path)
             except Exception as e:
                 print("Error: " + str(e))
                 Mbox("Error: ", str(e), 2)
@@ -72,10 +72,10 @@ class JsonHandler:
                 data = json.load(f)
                 is_Success = True
         except FileNotFoundError as e:
-            data = ["Setting file is not found", "Setting.json could not be loaded please do not move or delete the setting file.\n\nProgram will now automatically create and set the setting to default value"]
+            data = "Setting file is not found"
             # Handle exceptions in main
         except Exception as e:
-            data = [str(e)]
+            data = str(e)
             print("Error: " + str(e))
             Mbox("Error: ", str(e), 2)
         finally:

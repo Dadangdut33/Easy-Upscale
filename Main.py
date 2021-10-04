@@ -29,10 +29,12 @@ def console():
     print("=" * 70)
 
 def startfile(filename):
-  try:
-    os.startfile(filename)
-  except:
-    subprocess.Popen(['xdg-open', filename])
+    try:
+        os.startfile(filename)
+    except FileNotFoundError:
+        Mbox("File not found", "File not found! Please check your output directory in settings!", "error")
+    except:
+        subprocess.Popen(['xdg-open', filename])
 
 def OpenUrl(url):
     webbrowser.open_new(url)
@@ -301,8 +303,10 @@ class MainWindow:
         settings = fJson.readSetting()
         if settings['output_folder'] == "default":
             startfile(fJson.getDefaultImgPath())
+            print("Path: " + fJson.getDefaultImgPath())
         else:
             startfile(settings['output_path'])
+            print("Path: " + settings['output_path'])
 
     # About
     def about(self):

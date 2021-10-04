@@ -89,8 +89,8 @@ class SettingUI():
                     self.image_output_textbox.delete(0, END)
                     self.image_output_textbox.insert(0, settings["output_path"])
                 else:
-                    print("Directory not found! Program will set the output directory to default!")
-                    Mbox("Warning", "Directory not found! Program will set the output directory to default!", 2)
+                    print("Output Directory not found in settings! Program will now set the output directory to default!")
+                    Mbox("Warning", "Output directory not found! Program will now set the output directory to default!", 2)
                     status, details = fJson.setDefault()
                     if status:
                         Mbox("Success", details, 0)
@@ -104,8 +104,10 @@ class SettingUI():
             # Spinbox
             self.queue_spinbox_var.set(settings["max_queue"])
         else: # Error should not happen but just in case
+            fJson.setDefault()
+            fJson.loadSetting()
             print("Error: Cannot load settings")
-            Mbox("Error", settings, 2)
+            Mbox("Error", "Settings faild to load! Program will now try to set the settings to default. Error Details: " + settings, 2)
 
         # Create a button for save settings
         self.save_button = ttk.Button(self.bottomFrame, text="Save", command=self.save_Settings)
@@ -154,9 +156,12 @@ class SettingUI():
 
     # Initiate all the elements
     def iniate_Elements(self):
+        # Initiate all the elements from the settings
+        self.queue_spinbox_var.set(fJson.readSetting()["max_queue"])
         self.image_output_textbox.delete(0, END)
         self.image_output_textbox.insert(0, fJson.readSetting()["output_path"].replace(r'\resource\..', '').replace('/', '\\'))
-        if self.image_output_checkbutton_var.get() == True:
+        if self.image_output_checkbutton_var.get() == True: # If default path is checked
+            self.image_output_textbox.delete(0, END)
             self.image_output_textbox.insert(0, fJson.getDefaultImgPath().replace(r'\resource\..', '').replace('/', '\\'))
             self.image_output_textbox.config(state=DISABLED)
             self.image_output_button.config(state=DISABLED)
