@@ -4,7 +4,7 @@ import time
 from datetime import timedelta
 from .Loading_Popup import run_func_with_loading_popup
 from .Mbox import Mbox
-from .Public import flag
+from .Public import flag, fJson
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Error(Exception):
@@ -46,6 +46,7 @@ class Upscale:
             try:
                 os.makedirs(dir_Output)
             except Exception as e:
+                print("ERRROR DISINI")
                 print("Error: " + str(e))
                 Mbox("Error: ", str(e), 2)
 
@@ -66,6 +67,7 @@ class Upscale:
             # -------------------------------------------------
             # ESPCN
             if modelset == "espcn":
+                scale = int(scale)
                 scales = {2: "ESPCN_x2", 3: "ESPCN_x3", 4: "ESPCN_x4"}
                 if scale not in scales:
                     raise InvalidScale("Invalid scale! Available scale for ESPCN are either 2, 3, or 4")
@@ -73,6 +75,7 @@ class Upscale:
             # --------------------------------------------------
             # EDSR
             elif modelset == "edsr":
+                scale = int(scale)
                 scales = {2: "EDSR_x2", 3: "EDSR_x3", 4: "EDSR_x4"}
                 if scale not in scales:
                     raise InvalidScale("Invalid scale! Available scale for EDSR are either 2, 3, or 4")
@@ -80,6 +83,7 @@ class Upscale:
             # --------------------------------------------------
             # LapSRN
             elif modelset == "lapsrn":
+                scale = int(scale)
                 scales = {2: "LapSRN_x2", 4: "LapSRN_x4", 8: "LapSRN_x8"}
                 if scale not in scales:
                     raise InvalidScale("Invalid scale! Available scale for LapSRN are either 2, 4, or 8")
@@ -87,6 +91,7 @@ class Upscale:
             # --------------------------------------------------
             # FSRCNN
             elif modelset == "fsrcnn":
+                scale = int(scale)
                 scales = {2: "FSRCNN_x2", 3: "FSRCNN_x3", 4: "FSRCNN_x4"}
                 if scale not in scales:
                     raise InvalidScale("Invalid scale! Available scale for FSRCNN are either 2, 3, or 4")
@@ -94,6 +99,7 @@ class Upscale:
             # ---------------------------------------------------
             # FSRCNN-small
             elif modelset == "fsrcnn-small":
+                scale = int(scale)
                 scales = {2: "FSRCNN-small_x2", 3: "FSRCNN-small_x3", 4: "FSRCNN-small_x4"}
                 if scale not in scales:
                     raise InvalidScale("Invalid scale! Available scale for FSRCNN-small are either 2, 3, or 4")
@@ -101,9 +107,10 @@ class Upscale:
             # ---------------------------------------------------
             # None
             elif modelset == "none":
-                model = None
-
-            else: # Invalid type
+                model = ""
+            # ---------------------------------------------------
+            # Invalid
+            else:
                 Mbox("Error", "Invalid upscale type!\nAvailable upscale type are:\nESPCN\nEDSR\nLapSRN\nFSRCNN\nFSRCNN-small", 2)
                 return is_Success
 
@@ -111,7 +118,7 @@ class Upscale:
             if "small" in modelset:
                 modelset = "fsrcnn"
 
-            if model is not None:
+            if model != "":
                 # Check threads
                 if flag.threads_Running == False:
                     flag.is_Terminating = False
@@ -143,11 +150,17 @@ class Upscale:
                 print(f'Upscaling took {get_time_hh_mm_ss(upscaled_Time - startTime)} seconds')
 
             if noise_Removal:
-                # Noise removal
-                print('>> Removing noise.... Please wait....')
-                denoised = cv2.fastNlMeansDenoisingColored(upscaled, None, 10, 10, 7, 21) # denoise the image
-                print('Noise removal complete!')
-                print(f'Denoising took {get_time_hh_mm_ss(time.time() - upscaled_Time)} seconds')
+                if model != "": # Check if not upscaling
+                    print('>> Removing noise.... Please wait....')
+                    denoised = cv2.fastNlMeansDenoisingColored(upscaled, None, 10, 10, 7, 21) # denoise the image
+                    print('Noise removal complete!')
+                    print(f'Denoising took {get_time_hh_mm_ss(time.time() - upscaled_Time)} seconds')
+                else:
+                    print('>> Removing noise.... Please wait....')
+                    imgGet = cv2.imread(img_Path) # read the image
+                    denoised = cv2.fastNlMeansDenoisingColored(imgGet, None, 10, 10, 7, 21)
+                    print('Noise removal complete!')
+                    print(f'Denoising took {get_time_hh_mm_ss(time.time() - startTime)} seconds')
                 
                 # Check threads
                 if flag.threads_Running == False:
@@ -156,12 +169,20 @@ class Upscale:
                     return is_Success
 
                 # Save the image
-                outputDir = f"{dir_path}/../output/{getImgName(img_Path)} {scales[scale]} denoised.png"
+                if fJson.readSetting()['output_folder'].lower() == "default":
+                    outputDir = fJson.getDefaultImgPath() + "/" + getImgName(img_Path) + " " + model  + " denoised.png"
+                else:
+                    outputDir = fJson.readSetting()['output_path'] + "/" + getImgName(img_Path) + " " + " denoised.png"
+
                 cv2.imwrite(outputDir, denoised)
                 print(">> Image saved to: " + outputDir)
             else:
                 # Save the image
-                outputDir = f"{dir_path}/../output/{getImgName(img_Path)} {scales[scale]}.png"
+                if fJson.readSetting()['output_folder'].lower() == "default":
+                    outputDir = fJson.getDefaultImgPath() + "/" + getImgName(img_Path) + " " + model + ".png"
+                else:
+                    outputDir = fJson.readSetting()['output_path'] + "/" + getImgName(img_Path) + " " + model + ".png"
+
                 cv2.imwrite(outputDir, upscaled)
                 print(">> Image saved to: " + outputDir)
 
@@ -214,31 +235,3 @@ class Upscale:
         finally:
             print(f">> Total time taken: {get_time_hh_mm_ss(time.time() - startTime)}")
             return is_Success
-        
-if __name__ == "__main__":
-    upscale = Upscale()
-    bounc_speed = 4
-    pb_length = 250
-    window_title = "Loading..."
-    img = dir_path + "/../img/sample_img/sample1.png"
-    scale = 8
-    noise_removal = True
-    up_type = "LapSRN"
-    noiseRemoved = ' and removing noise' if noise_removal else ''
-    msg = f'Upscaling {getImgName(img)}{noiseRemoved}\nusing {up_type}_x{scale}, please wait...'
-
-    x = run_func_with_loading_popup(lambda: upscale.up_type(up_type, img, scale, noise_removal, r"D:\Coding\2021_Sem_3\Struktur_Data\Proyek\kel10-strukdat\output\\"), msg, window_title, bounc_speed, pb_length)
-
-    # print("succes" if x else "failed")
-
-    if x == None:
-        print("Canceled")
-
-    if x:
-        print("Success")
-    elif x == False:
-        print("Failed")
-
-    print("Done!")
-
-    os._exit(1)

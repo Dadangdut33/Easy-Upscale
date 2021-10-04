@@ -19,5 +19,5 @@ optionsVal = {
     "FSRCNN": [2, 3, 4],
     "FSRCNN-small": [2, 3, 4],
     "LapSRN": [2, 4, 8],
-    "None": None
+    "None": "None"
 }

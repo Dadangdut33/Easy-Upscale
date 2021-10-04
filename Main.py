@@ -401,6 +401,11 @@ class MainWindow:
         if not os.path.isfile(self.image_path_textbox.get()):
             Mbox("Error", "Image not found", 0)
             return
+
+        # Check if not upscaling then user must enable the remove noise button
+        if self.model_choosing_combobox.get() == "None" and self.remove_Noise_Var.get() == False:
+            Mbox("Invalid options", "You need to atleast check one of the options available!", 0)
+            return
         
         # Check img resolution, if more than 1920px then show warning
         w, h = getImg_W_H(self.image_path_textbox.get())
@@ -415,6 +420,7 @@ class MainWindow:
         model_name = self.model_choosing_combobox.get()
         scale = self.scaling_options_combobox.get()
         remove_noise = self.remove_Noise_Var.get()
+        
         # Add to queue
         self.upscale_Queue.enqueue([image_path, getImgName(image_path), getImgDetails(image_path), model_name, scale, remove_noise])
         # Update the label
@@ -466,13 +472,20 @@ class MainWindow:
             # Get the data of the head
             img_Path = headData[0]
             up_Type = headData[3]
-            scale = int(headData[4])
+            scale = headData[4]
             remove_Noise = headData[5]
-            dir_Output = fJson.readSetting()['output_path']
+            # Get output path
+            if fJson.readSetting()['output_folder'].lower() == "default":
+                dir_Output = fJson.getDefaultImgPath()
+            else:
+                dir_Output = fJson.readSetting()['output_path']
 
             # Msg for loading popup
-            noiseRemoved = ' and removing noise' if remove_Noise else ''
-            msg = f'Upscaling {getImgName(img_Path)}.{getImgType_Only(img_Path)}{noiseRemoved}\nusing {up_Type}_x{scale}, please wait...'
+            if up_Type != "None":
+                noiseRemoved = ' and removing noise' if remove_Noise else ''
+                msg = f'Upscaling {getImgName(img_Path)}.{getImgType_Only(img_Path)}{noiseRemoved}\nusing {up_Type}_x{scale}, please wait...'
+            else:
+                msg = f'Removing noise for {getImgName(img_Path)}.{getImgType_Only(img_Path)}, please wait...'
 
             # Upscale the image
             upscale_status = run_func_with_loading_popup(
