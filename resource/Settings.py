@@ -186,10 +186,10 @@ class SettingUI():
     # Save settings to json file
     def save_Settings(self):
         settings = {}
-        if self.image_output_checkbutton_var.get() == True: # If checkbox is checked
+        if self.image_output_checkbutton_var.get() == True: # If set to default
             settings = {
                 "output_folder": "default",
-                "output_path": fJson.getDefaultImgPath(),
+                "output_path": "",
                 "max_queue": self.queue_spinbox_var.get()
             }
         else:
@@ -199,8 +199,8 @@ class SettingUI():
                 "max_queue": self.queue_spinbox_var.get()
             }
     
-        # Check if the folder exists
-        if os.path.isdir(settings["output_path"]):
+        # Save settings
+        if (settings["output_folder"] == "default"): # Check if output folder is default or not
             status, details = fJson.writeSetting(settings)
             if status:
                 print(details)
@@ -209,7 +209,16 @@ class SettingUI():
             else:
                 Mbox("Error", details, 2)
         else:
-            Mbox("Error", "The folder does not exist", 2)
+            if os.path.isdir(settings["output_path"]): # If not default then check again the dir exist or not
+                status, details = fJson.writeSetting(settings)
+                if status:
+                    print(details)
+                    Mbox("Success", details, 0)
+                    self.iniate_Elements()
+                else:
+                    Mbox("Error", details, 2)
+            else:
+                Mbox("Error", "The folder does not exist", 2)
 
     # Copy currently selected path to clipboard
     def copy_Path(self):
