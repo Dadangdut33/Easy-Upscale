@@ -15,6 +15,8 @@ from resource.Mbox import Mbox
 from resource.Settings import SettingUI
 from resource.Public import fJson, options, optionsVal, flag
 
+# ----------------------------------------------------------------
+# Locals
 # Public var
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -310,11 +312,11 @@ class MainWindow:
 
     # About
     def about(self):
-        Mbox("About", "Ez Upscale\nVersion: 1.0\nAuthor:\n-Fauzan Farhan Antoro\n-Muhammad Hanief Mulfadinar", 0)
+        Mbox("About", "Ez Upscale.\nDibuat untuk memenuhi tugas mata kuliah Struktur Data\n\nVersion: 1.0-tg\nKelompok 10 - Kelas 3A\nAuthor:\n-Fauzan Farhan Antoro\n-Muhammad Hanief Mulfadinar\n", 0)
 
     # Tutorial
     def tutorial(self):
-        Mbox("Tutorial", "Tutorial", 0)
+        Mbox("Tutorial", "1. Search for image\n2. Choose upscale settings option\n3. (Optional) Set image output in settings\n4. Start Upscaling", 0)
 
     # Browse Image
     def browse_Image(self):
