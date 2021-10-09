@@ -8,7 +8,7 @@ from .Public import fJson
 
 # ----------------------------------------------------------------
 # SettingUI
-class SettingUI():
+class SettingUI:
     # -------------------------------------------------
     # Constructor
     def __init__(self):

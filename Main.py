@@ -3,6 +3,7 @@ from resource.Loading_Popup import run_func_with_loading_popup
 from tkinter import *
 from tkinter import filedialog
 from PIL import Image
+from sys import exit
 import tkinter.ttk as ttk
 import webbrowser
 import subprocess
@@ -281,7 +282,7 @@ class MainWindow:
     def on_Closing(self):
         if Mbox("Confirmation", "Are you sure you want to exit?", 3):
             self.root.destroy()
-            exit()        
+            exit()
 
     # Allowed keys
     def allowedKey(self, event):
@@ -522,6 +523,7 @@ class MainWindow:
         else:
             self.fill_Treeview()
             Mbox("Error", "Failed to upscale image.\nReason: " + headData, 2)
+            flag.is_error = True
 
     # Remove top
     def remove_Head(self):
