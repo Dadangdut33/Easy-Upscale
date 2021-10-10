@@ -5,9 +5,13 @@ block_cipher = None
 
 
 a = Analysis(['Main.py'],
-             pathex=['D:\\Coding\\2021_Sem_3\\Struktur_Data\\Proyek\\kel10-strukdat'],
+             pathex=['./'],
              binaries=[],
-             datas=[],
+             datas=[
+                ("./settings", "Settings"),
+                ("./models", "models"),
+                ("./output/readme.md", "output"),
+             ],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
@@ -41,4 +45,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='Main')
+               name='Ez Upscale')
