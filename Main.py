@@ -282,13 +282,19 @@ class MainWindow:
     # Allowed keys
     def allowedKey(self, event):
         key = event.keysym
+        allowed = False
+
         if key.lower() in ['left', 'right']: # Arrow left right
+            allowed = True
             return
-        elif (12 == event.state and key == 'a'):
+        if (4 == event.state and key == 'a'): # Ctrl + a
+            allowed = True
             return
-        elif (12 == event.state and key == 'c'): 
+        if (4 == event.state and key == 'c'): # Ctrl + c
+            allowed = True
             return
-        else:
+        
+        if not allowed:
             return "break"
 
     # Open the settings window
