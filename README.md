@@ -4,6 +4,11 @@ Anggota:
 1. Fauzan Farhan A - 11200910000004
 2. M Hanif - 11200910000021
 
+# Minimum python version
+Checked using vermin
+Minimum required versions: 3.6
+Incompatible versions:     2
+
 # Deskripsi Aplikasi
 Aplikasi ini dibuat untuk memenuhi tugas mata kuliah Struktur Data. Konsep aplikasinya adalah aplikasi untuk mengupscale/menaikkan kualitas gambar. Temat utamanya adalah  queue, kami mengimplementasikan circular queue untuk pooling/menyimpan list gambar yang akan di upscale. Pembuatan gui dibuat manual dengan menggunakan library tkinter. Untuk proses upscale nya sendiri menggunakan library OpenCV dengan model yang didapat dari open source.
 
