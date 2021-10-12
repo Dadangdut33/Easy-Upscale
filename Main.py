@@ -1,4 +1,4 @@
-import os
+import os, getpass
 from resource.Loading_Popup import run_func_with_loading_popup
 from tkinter import *
 from tkinter import filedialog
@@ -330,7 +330,8 @@ class MainWindow:
 
     # Browse Image
     def browse_Image(self):
-        self.image_path = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(
+        dir_pic = f"C:\\Users\\{getpass.getuser()}\\Pictures"
+        self.image_path = filedialog.askopenfilename(initialdir=dir_pic, title="Select file", filetypes=(
             ("image files", "*.jpg"), ('image files', '*.png'), ('image files', '*.jpeg'), # Allow images only
         ))
         if self.image_path != "":
