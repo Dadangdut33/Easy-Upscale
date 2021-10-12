@@ -15,4 +15,4 @@ Aplikasi ini dibuat untuk memenuhi tugas mata kuliah Struktur Data. Konsep aplik
 | Buat logic pooling gambar dengan circural queue   | Fauzan        | Done           | ✅
 | Buat gui                                          | Fauzan dan Hanif        | Done        | ✅
 | Implementasi backend dengan frontend gui          | Fauzan dan Hanif        | Done        | ✅
-| Test aplikasi                                     | Fauzan dan Hanif        | in progress        | ⬜
+| Test aplikasi & Improvement                                   | Fauzan dan Hanif        | in progress        | ⬜
