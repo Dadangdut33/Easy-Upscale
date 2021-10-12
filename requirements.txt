@@ -5,6 +5,7 @@ Pillow == 8.3.2
 
 # \kel10-strukdat\resource\Upscale.py: 1
 opencv_python == 4.5.3.56
+opencv-contrib-python == 4.5.3.56
 
 # \kel10-strukdat\resource\Settings.py: 5
 pyperclip == 1.8.2
