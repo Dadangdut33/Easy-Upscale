@@ -31,14 +31,6 @@ def console():
     print("|\t\tThis window is for debugging purposes\t\t     |")
     print("=" * 70)
 
-def startfile(filename):
-    try:
-        os.startfile(filename)
-    except FileNotFoundError:
-        Mbox("File not found", "File not found! Please check your output directory in settings!", "error")
-    except:
-        subprocess.Popen(['xdg-open', filename])
-
 def OpenUrl(url):
     webbrowser.open_new(url)
 
@@ -67,7 +59,7 @@ class MainWindow:
         self.upscale = Upscale()
         self.bounc_speed = 4
         self.pb_length = 250
-        self.window_title = "Loading..."
+        self.window_title = "Loading..." # Title for loading frame
 
         # Load settings
         settings = fJson.readSetting() # Settings are loaded first at SettingUI so now only need to read the settings
@@ -76,6 +68,9 @@ class MainWindow:
         self.root.geometry("900x600")
         self.alwaysOnTop = False
         self.root.protocol("WM_DELETE_WINDOW", self.on_Closing)
+
+        # Ref main frame in public
+        flag.main_Frame = self.root
 
         # Frames
         # Top Frame
@@ -280,7 +275,7 @@ class MainWindow:
 
     # on close
     def on_Closing(self):
-        if Mbox("Confirmation", "Are you sure you want to exit?", 3):
+        if Mbox("Confirmation", "Are you sure you want to exit?", 3, self.root):
             self.root.destroy()
             exit()
 
@@ -305,19 +300,27 @@ class MainWindow:
         print("Opened output folder")
         settings = fJson.readSetting()
         if settings['output_folder'] == "default":
-            startfile(fJson.getDefaultImgPath())
+            self.startfile(fJson.getDefaultImgPath())
             print("Path: " + fJson.getDefaultImgPath())
         else:
-            startfile(settings['output_path'])
+            self.startfile(settings['output_path'])
             print("Path: " + settings['output_path'])
+
+    def startfile(self, filename):
+        try:
+            os.startfile(filename)
+        except FileNotFoundError:
+            Mbox("File not found", "File not found! Please check your output directory in settings!", 2, self.root)
+        except:
+            subprocess.Popen(['xdg-open', filename])
 
     # About
     def about(self):
-        Mbox("About", "Ez Upscale.\nDibuat untuk memenuhi tugas mata kuliah Struktur Data\n\nVersion: 1.0-tg\nKelompok 10 - Kelas 3A\nAuthor:\n-Fauzan Farhan Antoro\n-Muhammad Hanief Mulfadinar\n", 0)
+        Mbox("About", "Ez Upscale.\nDibuat untuk memenuhi tugas mata kuliah Struktur Data\n\nVersion: 1.0-tg\nKelompok 10 - Kelas 3A\nAuthor:\n-Fauzan Farhan Antoro\n-Muhammad Hanief Mulfadinar\n", 0, self.root)
 
     # Tutorial
     def tutorial(self):
-        Mbox("Tutorial", "1. Search for image\n2. Choose upscale settings option\n3. (Optional) Set image output in settings\n4. Start Upscaling", 0)
+        Mbox("Tutorial", "1. Search for image\n2. Choose upscale settings option\n3. (Optional) Set image output in settings\n4. Start Upscaling", 0, self.root)
 
     # Browse Image
     def browse_Image(self):
@@ -389,25 +392,25 @@ class MainWindow:
         # Double checking
         # Check if the image is inputted
         if self.image_path_textbox.get() == "":
-            Mbox("Error", "Please input the image", 0)
+            Mbox("Error", "Please input the image", 0, self.root)
             return
         # Check if the model is inputted
         if self.model_choosing_combobox.get() == "":
-            Mbox("Error", "Please input the model", 0)
+            Mbox("Error", "Please input the model", 0, self.root)
             return
         # Check if the scale is inputted
         if self.scaling_options_combobox.get() == "":
-            Mbox("Error", "Please input the scale", 0)
+            Mbox("Error", "Please input the scale", 0, self.root)
             return
 
         # Check if the image is exist or not
         if not os.path.isfile(self.image_path_textbox.get()):
-            Mbox("Error", "Image not found", 0)
+            Mbox("Error", "Image not found", 0, self.root)
             return
 
         # Check if not upscaling then user must enable the remove noise button
         if self.model_choosing_combobox.get() == "None" and self.remove_Noise_Var.get() == False:
-            Mbox("Invalid options", "You need to atleast check one of the options available!", 0)
+            Mbox("Invalid options", "You need to atleast check one of the options available!", 0, self.root)
             return
         
         # Check img resolution, if more than 1920px then show warning
@@ -415,7 +418,7 @@ class MainWindow:
         if w > 1920 or h > 1080:
             # Ask for confirmation to continue if image inpujtted is already hd
             if not Mbox("Warning", "The image resolution seems to be at HD already, do you still want to continue?\n\n" + 
-                    "*Please note that you might not be able to upscale it any further as it would need more memory resource to process the image", 3):
+                    "*Please note that you might not be able to upscale it any further as it would need more memory resource to process the image", 3, self.root):
                 return
 
         # Get the data
@@ -457,11 +460,11 @@ class MainWindow:
                 break
         if not flag.is_error: # If there is no error then show success message
             print(">> Batch Upscale process completed, Successfully processes " + str(count) + " images")
-            Mbox("Batch Upscale process completed", "Successfully processes " + str(count) + " images", 0)
+            Mbox("Batch Upscale process completed", "Successfully processes " + str(count) + " images", 0, self.root)
         else: # If there is error then show error message
             flag.is_error = False
             flag.mode_batch = False
-            Mbox("Error", "Upscaling process is canceled because of an error", 1)
+            Mbox("Error", "Upscaling process is canceled because of an error", 1, self.root)
 
 
     # Upscale top
@@ -502,19 +505,19 @@ class MainWindow:
                     self.fill_Treeview()
                     if not running_Batch:
                         print(">> Image successfully processed")
-                        Mbox("Success", f"Successfully processed {dequeued_Data[1]}.{getImgType_Only(dequeued_Data[0])}", 0)
+                        Mbox("Success", f"Successfully processed {dequeued_Data[1]}.{getImgType_Only(dequeued_Data[0])}", 0, self.root)
             # Canceled by user
             elif upscale_status == None:
                 flag.is_Terminating = False
                 print(">> Process canceled by user")
-                Mbox("Canceled", "Upscaling process canceled by user", 1)
+                Mbox("Canceled", "Upscaling process canceled by user", 1, self.root)
                 self.fill_Treeview()
 
             # Error
             if flag.is_error == True and not flag.mode_batch:
                 flag.is_error = False
                 print(">> Error")
-                Mbox("Error", "Upscaling process is canceled because of an error", 1)
+                Mbox("Error", "Upscaling process is canceled because of an error", 1, self.root)
                 self.fill_Treeview()
 
             # Failed is already handled in the upscale class
@@ -522,7 +525,7 @@ class MainWindow:
         # Failed to get queue data
         else:
             self.fill_Treeview()
-            Mbox("Error", "Failed to upscale image.\nReason: " + headData, 2)
+            Mbox("Error", "Failed to upscale image.\nReason: " + headData, 2, self.root)
             flag.is_error = True
 
     # Remove top
@@ -533,10 +536,10 @@ class MainWindow:
         status, data = self.upscale_Queue.dequeue()
         if status:
             self.fill_Treeview()
-            Mbox("Success", f"{data[1]}.{getImgType_Only(data[0])} has been removed from queue", 0)
+            Mbox("Success", f"{data[1]}.{getImgType_Only(data[0])} has been removed from queue", 0, self.root)
         else:
             self.fill_Treeview()
-            Mbox("Error", "Failed to remove the top queue.\nReason: " + data, 2)
+            Mbox("Error", "Failed to remove the top queue.\nReason: " + data, 2, self.root)
 
     # Remove all
     def clear_Queue(self):
@@ -546,7 +549,7 @@ class MainWindow:
         status = self.upscale_Queue.clear()
         if status:
             self.fill_Treeview()
-            Mbox("Success", "Queue has been cleared successfully", 0)
+            Mbox("Success", "Queue has been cleared successfully", 0, self.root)
             self.upscale_Queue.display()
 
 if __name__ == "__main__":

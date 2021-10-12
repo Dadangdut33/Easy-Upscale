@@ -7,6 +7,7 @@ class Flags:
         self.running_Batch = False
         self.is_error = False
         self.mode_batch = False
+        self.main_Frame = None
 
 fJson = JsonHandler()
 flag = Flags()

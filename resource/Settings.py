@@ -90,12 +90,12 @@ class SettingUI:
                     self.image_output_textbox.insert(0, settings["output_path"])
                 else:
                     print("Output Directory not found in settings! Program will now set the output directory to default!")
-                    Mbox("Warning", "Output directory not found! Program will now set the output directory to default!", 2)
+                    Mbox("Warning", "Output directory not found! Program will now set the output directory to default!", 2, self.root)
                     status, details = fJson.setDefault()
                     if status:
-                        Mbox("Success", details, 0)
+                        Mbox("Success", details, 0, self.root)
                     else: # Error should not happen but just in case
-                        Mbox("Error", details, 2)
+                        Mbox("Error", details, 2, self.root)
 
                     status, details = fJson.loadSetting()
                     self.image_output_textbox.delete(0, END)
@@ -107,7 +107,7 @@ class SettingUI:
             fJson.setDefault()
             fJson.loadSetting()
             print("Error: Cannot load settings")
-            Mbox("Error", "Settings faild to load! Program will now try to set the settings to default. Error Details: " + settings, 2)
+            Mbox("Error", "Settings faild to load! Program will now try to set the settings to default. Error Details: " + settings, 2, self.root)
 
         # Create a button for save settings
         self.save_button = ttk.Button(self.bottomFrame, text="Save", command=self.save_Settings)
@@ -204,49 +204,49 @@ class SettingUI:
             status, details = fJson.writeSetting(settings)
             if status:
                 print(details)
-                Mbox("Success", details, 0)
+                Mbox("Success", details, 0, self.root)
                 self.iniate_Elements()
             else:
-                Mbox("Error", details, 2)
+                Mbox("Error", details, 2, self.root)
         else:
             if os.path.isdir(settings["output_path"]): # If not default then check again the dir exist or not
                 status, details = fJson.writeSetting(settings)
                 if status:
                     print(details)
-                    Mbox("Success", details, 0)
+                    Mbox("Success", details, 0, self.root)
                     self.iniate_Elements()
                 else:
-                    Mbox("Error", details, 2)
+                    Mbox("Error", details, 2, self.root)
             else:
-                Mbox("Error", "The folder does not exist", 2)
+                Mbox("Error", "The folder does not exist", 2, self.root)
 
     # Copy currently selected path to clipboard
     def copy_Path(self):
         pyperclip.copy(self.image_output_textbox.get())
         print("Text copied to clipboard")
-        Mbox("Success", "Path has been copied to clipboard", 0)
+        Mbox("Success", "Path has been copied to clipboard", 0, self.root)
 
     # Set current setting to default
     def set_Default(self):
         # Ask for confirmation
-        if Mbox("Confirmation", "Are you sure you want to set the default settings?", 3):
+        if Mbox("Confirmation", "Are you sure you want to set the default settings?", 3, self.root):
             status, details = fJson.setDefault()
             if status:
                 print(details)
-                Mbox("Success", details, 0)
+                Mbox("Success", details, 0, self.root)
                 self.image_output_checkbutton_var.set(True)
                 self.iniate_Elements()
             else:
                 print(details)
-                Mbox("Error", details, 2)
+                Mbox("Error", details, 2, self.root)
     
     # Set current setting to currently stored
     def set_Currently_Stored(self):
         # Ask for confirmation
-        if Mbox("Confirmation", "Are you sure you want to reset the currently stored settings?", 3):            
+        if Mbox("Confirmation", "Are you sure you want to reset the currently stored settings?", 3, self.root):            
             settings = fJson.readSetting()
             print(settings)
-            Mbox("Success", "Successfully set setting to currently stored", 0)
+            Mbox("Success", "Successfully set setting to currently stored", 0, self.root)
 
             self.iniate_Elements()
 

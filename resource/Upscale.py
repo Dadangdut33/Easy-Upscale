@@ -2,7 +2,6 @@ import cv2
 import os
 import time
 from datetime import timedelta
-from .Loading_Popup import run_func_with_loading_popup
 from .Mbox import Mbox
 from .Public import flag, fJson
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -48,7 +47,7 @@ class Upscale:
             except Exception as e:
                 print("ERRROR DISINI")
                 print("Error: " + str(e))
-                Mbox("Error: ", str(e), 2)
+                Mbox("Error: ", str(e), 2, flag.main_Frame)
 
     # -------------------------------------------------
     # Upscale
@@ -111,7 +110,7 @@ class Upscale:
             # ---------------------------------------------------
             # Invalid
             else:
-                Mbox("Error", "Invalid upscale type!\nAvailable upscale type are:\nESPCN\nEDSR\nLapSRN\nFSRCNN\nFSRCNN-small", 2)
+                Mbox("Error", "Invalid upscale type!\nAvailable upscale type are:\nESPCN\nEDSR\nLapSRN\nFSRCNN\nFSRCNN-small", 2, flag.main_Frame)
                 return is_Success
 
             # For fsrcnn-small
@@ -194,7 +193,7 @@ class Upscale:
             flag.is_error = True
             # Print the error message
             print(str(e))
-            Mbox("Error: Invalid scale", "Invalid scale! Scale must be either 2, 3 or 4", 2)
+            Mbox("Error: Invalid scale", "Invalid scale! Scale must be either 2, 3 or 4", 2, flag.main_Frame)
         except cv2.error as e:
             flag.running_Batch = False
             flag.is_Terminating = False
@@ -207,7 +206,7 @@ class Upscale:
 
                 # Error popup
                 Mbox("Error: Model not found", "Model not found! Please verify that the model exist in 'models' folder. " + 
-                "If model is lost, you need to download it again!\n\nError details: " + str(e), 2)
+                "If model is lost, you need to download it again!\n\nError details: " + str(e), 2, flag.main_Frame)
             elif "Insufficient memory" in str(e):
                 # Print error to console
                 print("Error: ")
@@ -215,14 +214,14 @@ class Upscale:
                 print(">> Tips: Try to use other models")
 
                 # Error popup
-                Mbox("Error: Insufficient memory", "Insufficient memory!\nThis usually happen because the image resolution is too big! This error happened because it literally takes that many memories to start upscaling\n*Tips: Try to use other models\n\nError details: " + str(e), 2)
+                Mbox("Error: Insufficient memory", "Insufficient memory!\nThis usually happen because the image resolution is too big! This error happened because it literally takes that many memories to start upscaling\n*Tips: Try to use other models\n\nError details: " + str(e), 2, flag.main_Frame)
             else: 
                 # Print error to console
                 print("Error: ")
                 print(str(e))
 
                 # Error popup
-                Mbox("Error", "Error occured while processing the image.\n\nDetails: " + str(e), 2)
+                Mbox("Error", "Error occured while processing the image.\n\nDetails: " + str(e), 2, flag.main_Frame)
         except Exception as e:
             flag.running_Batch = False
             flag.is_Terminating = False
@@ -231,7 +230,7 @@ class Upscale:
             print(str(e))
 
             # Error popup
-            Mbox("Error", "Error occured while processing the image.\n\nDetails: " + str(e), 2)
+            Mbox("Error", "Error occured while processing the image.\n\nDetails: " + str(e), 2, flag.main_Frame)
         finally:
             print(f">> Total time taken: {get_time_hh_mm_ss(time.time() - startTime)}")
             return is_Success

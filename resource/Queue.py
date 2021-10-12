@@ -1,5 +1,6 @@
 from tabulate import tabulate
 from .Mbox import Mbox
+from .Public import flag
 
 class Circular_Q:
     """
@@ -54,7 +55,7 @@ class Circular_Q:
             is_Success = True
         except Exception as e:
             print("Fail to clear Queue!\nReason: " + str(e))
-            Mbox("Fail to clear Queue!", str(e), 2)
+            Mbox("Fail to clear Queue!", str(e), 2, flag.main_Frame)
         finally:
             return is_Success
 
@@ -119,7 +120,7 @@ class Circular_Q:
             # Check full
             if self.is_Full(): # size = capacity
                 print("Queue is Full!")
-                Mbox("Queue is Full!", "Queue is full! You cannot add any more item!", 1)
+                Mbox("Queue is Full!", "Queue is full! You cannot add any more item!", 1, flag.main_Frame)
                 return is_Success
 
             # Store the data
@@ -133,7 +134,7 @@ class Circular_Q:
             is_Success = True
         except Exception as e:
             print("Fail to enqueue!\nReason: " + str(e))
-            Mbox("Fail to enqueue!", "Fail to enqueue! Reason: " + str(e), 2)
+            Mbox("Fail to enqueue!", "Fail to enqueue! Reason: " + str(e), 2, flag.main_Frame)
         finally:
             return is_Success
             
