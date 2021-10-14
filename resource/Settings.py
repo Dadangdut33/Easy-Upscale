@@ -20,7 +20,7 @@ class SettingUI:
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         # Frames
-        self.firstFrame = ttk.LabelFrame(self.root, text="• Image / OCR Setting")
+        self.firstFrame = LabelFrame(self.root, text="• Image / OCR Setting")
         self.firstFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
         
         self.firstFrameContent = Frame(self.firstFrame)
@@ -29,7 +29,7 @@ class SettingUI:
         self.firstFrameContent_2 = Frame(self.firstFrame)
         self.firstFrameContent_2.pack(side=TOP, fill=X, expand=False)
 
-        self.secondFrame = ttk.LabelFrame(self.root, text="• Queue Settings")
+        self.secondFrame = LabelFrame(self.root, text="• Queue Settings")
         self.secondFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
 
         self.secondFrameContent = Frame(self.secondFrame)
@@ -64,7 +64,7 @@ class SettingUI:
         # Create a spinbox for queue size
         self.validateDigits = (self.root.register(self.validateSpinBox), '%P')
         self.queue_spinbox_var = IntVar(self.root)
-        self.queue_spinbox = Spinbox(self.secondFrameContent, from_=1, to=200, width=20, textvariable=self.queue_spinbox_var)
+        self.queue_spinbox = ttk.Spinbox(self.secondFrameContent, from_=1, to=200, width=20, textvariable=self.queue_spinbox_var)
         self.queue_spinbox.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
         self.queue_spinbox.configure(validate='key', validatecommand=self.validateDigits)
 

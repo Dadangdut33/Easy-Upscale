@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import filedialog
 from PIL import Image
 from sys import exit
+from time import localtime, strftime
 import tkinter.ttk as ttk
 import webbrowser
 import subprocess
@@ -14,7 +15,7 @@ from resource.Upscale import Upscale, getImgName
 from resource.Queue import Circular_Q
 from resource.Mbox import Mbox
 from resource.Settings import SettingUI
-from resource.Public import fJson, options, optionsVal, flag
+from resource.Public import fJson, options, optionsVal, global_, TextWithVar
 
 # ----------------------------------------------------------------
 # Locals
@@ -65,24 +66,24 @@ class MainWindow:
         settings = fJson.readSetting() # Settings are loaded first at SettingUI so now only need to read the settings
         self.upscale_Queue = Circular_Q(settings['max_queue'])
         self.root.title("Ez Upscale")
-        self.root.geometry("900x600")
+        self.root.geometry("900x700")
         self.alwaysOnTop = False
         self.root.protocol("WM_DELETE_WINDOW", self.on_Closing)
 
         # Ref main frame in public
-        flag.main_Frame = self.root
+        global_.main_Frame = self.root
 
         # Frames
         # Top Frame
         # 1st frame for image input
-        self.firstFrame = ttk.LabelFrame(self.root, text="• Input Image")
+        self.firstFrame = LabelFrame(self.root, text="• Input Image", font="TkDefaultFont 10 bold")
         self.firstFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
                 
         self.firstFrameContent = Frame(self.firstFrame)
         self.firstFrameContent.pack(side=TOP, fill=X, expand=False)
 
         # 2nd frame for upscale settings
-        self.secondFrame = ttk.LabelFrame(self.root, text="• Upscale Settings")
+        self.secondFrame = LabelFrame(self.root, text="• Upscale Settings", font="TkDefaultFont 10 bold")
         self.secondFrame.pack(side=TOP, fill=X, expand=False, padx=5, pady=5)
 
         self.secondFrameContent = Frame(self.secondFrame)
@@ -98,7 +99,7 @@ class MainWindow:
         self.secondFrameContent_4.pack(side=TOP, fill=X, expand=False)
 
         # 3rd frame for the queue and the button
-        self.thirdFrame = ttk.LabelFrame(self.root, text="• Queue")
+        self.thirdFrame = LabelFrame(self.root, text="• Queue", font="TkDefaultFont 10 bold")
         self.thirdFrame.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=5)
 
         self.thirdFrameContent = Frame(self.thirdFrame)
@@ -113,19 +114,25 @@ class MainWindow:
         self.thirdFrameContent_3_x = Frame(self.thirdFrame)
         self.thirdFrameContent_3_x.pack(side=TOP, fill=X, expand=False)
 
+        self.thirdFrameContent_4 = Frame(self.thirdFrame) # For status
+        self.thirdFrameContent_4.pack(side=TOP, fill=X, expand=False)
+
+        self.thirdFrameContent_4_Bottom = Frame(self.thirdFrame) # For status
+        self.thirdFrameContent_4_Bottom.pack(side=TOP, fill=X, expand=False)
+
         # ----------------------------------------------------------------
         # Browse image
         # Create a textbox for image path
-        self.image_path_textbox = Entry(self.firstFrameContent)
+        self.image_path_textbox = ttk.Entry(self.firstFrameContent)
         self.image_path_textbox.pack(side=LEFT, fill=X, expand=True, padx=5, pady=5)
         self.image_path_textbox.bind("<Key>", lambda event: self.allowedKey(event)) # Disable textbox input
 
         # Create a button for image to browse image
-        self.browse_button = Button(self.firstFrameContent, text="Browse", command=self.browse_Image)
+        self.browse_button = ttk.Button(self.firstFrameContent, text="Browse", command=self.browse_Image)
         self.browse_button.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for clear textbox
-        self.clear_button = Button(self.firstFrameContent, text="Clear", command=self.clear_Textbox)
+        self.clear_button = ttk.Button(self.firstFrameContent, text="Clear", command=self.clear_Textbox)
         self.clear_button.pack(side=LEFT, padx=5, pady=5)
 
         # ----------------------------------------------------------------
@@ -159,11 +166,11 @@ class MainWindow:
 
         # Create a checkbox for remove noise or not
         self.remove_Noise_Var = BooleanVar()
-        self.remove_noise_checkbox = Checkbutton(self.secondFrameContent_3, text="Remove Noise", variable=self.remove_Noise_Var)
+        self.remove_noise_checkbox = ttk.Checkbutton(self.secondFrameContent_3, text="Remove Noise", variable=self.remove_Noise_Var)
         self.remove_noise_checkbox.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for image to upscale
-        self.add_to_queue_button = Button(self.secondFrameContent_4, text="Add to queue", command=self.add_To_Queue)
+        self.add_to_queue_button = ttk.Button(self.secondFrameContent_4, text="Add to queue", command=self.add_To_Queue)
         self.add_to_queue_button.pack(side=LEFT, expand=True, fill=BOTH, padx=5, pady=5)
 
         # ----------------------------------------------------------------
@@ -173,19 +180,19 @@ class MainWindow:
         self.queue_label.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for upscale all
-        self.upscale_all_button = Button(self.thirdFrameContent_2, text="Upscale all", command=self.upscale_All)
+        self.upscale_all_button = ttk.Button(self.thirdFrameContent_2, text="Upscale all", command=self.upscale_All)
         self.upscale_all_button.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for upscale top queue
-        self.upscale_top_button = Button(self.thirdFrameContent_2, text="Upscale top", command=self.upscale_Head)
+        self.upscale_top_button = ttk.Button(self.thirdFrameContent_2, text="Upscale top", command=self.upscale_Head)
         self.upscale_top_button.pack(side=LEFT, padx=5, pady=5)
 
         # Create a button for remove top queue
-        self.remove_top_button = Button(self.thirdFrameContent_2, text="Remove top", command=self.remove_Head)
+        self.remove_top_button = ttk.Button(self.thirdFrameContent_2, text="Remove top", command=self.remove_Head)
         self.remove_top_button.pack(side=LEFT, fill=X, padx=5, pady=5)
 
         # Create a button for clear queue
-        self.clear_queue_button = Button(self.thirdFrameContent_2, text="Clear queue", command=self.clear_Queue)
+        self.clear_queue_button = ttk.Button(self.thirdFrameContent_2, text="Clear queue", command=self.clear_Queue)
         self.clear_queue_button.pack(side=LEFT, fill=X, padx=5, pady=5)
         
         # Create a treeview for queue
@@ -217,6 +224,33 @@ class MainWindow:
         self.queue_Table.config(yscrollcommand=self.scrollbarY.set, xscrollcommand=self.scrollbarX.set)
         self.queue_Table.bind('<Button-1>', self.handle_click)
 
+        # Create a label for status
+        """
+        Status:
+        Green: Ready
+        Yellow: Processing
+        Red: Error / Terminating
+        """
+        self.status_header = Label(self.thirdFrameContent_4, text="Status :", font=("Arial", 12, "bold"))
+        self.status_header.pack(side=LEFT, padx=2, pady=0, ipady=2)
+
+        self.status_label = Label(self.thirdFrameContent_4, text="Ready!", font=("Arial", 11), fg="green")
+        self.status_label.pack(side=LEFT, padx=0, pady=0, ipady=2)
+        global_.status_label = self.status_label
+
+        # Create a status textbox
+        self.status_var = StringVar()
+
+        self.status_textbox = TextWithVar(self.thirdFrameContent_4_Bottom, textvariable=self.status_var, 
+        font=("consolas"), width=50, height=4, wrap=WORD, background="white", foreground="black", yscrollcommand=True)
+        self.status_textbox.pack(side=LEFT, expand=True, fill=BOTH, padx=5, pady=2, ipady=0)
+        self.status_textbox.bind("<Key>", lambda event: self.allowedKey(event)) # Disable textbox input
+
+        global_.status_var = self.status_var
+        startupTime = strftime("%H:%M:%S", localtime())
+        global_.status_var.set(f"[{startupTime}] Ready!")
+        global_.statusChange(f"Queue created with capacity of {settings['max_queue']} img!")
+        
         # Menubar
         self.menubar = Menu(self.root)
 
@@ -228,18 +262,23 @@ class MainWindow:
         self.menubar.add_cascade(label="Options", menu=self.file_menu)
 
         self.filemenu2 = Menu(self.menubar, tearoff=0)
-        self.filemenu2.add_command(label="Setting", command=self.open_Setting) # Open Setting Window
-        self.filemenu2.add_command(label="Output", command=self.open_Output) # Open Setting Window
+        self.filemenu2.add_command(label="Setting", command=self.open_Setting, accelerator="F2") # Open Setting Window
+        self.filemenu2.add_command(label="Output", command=self.open_Output, accelerator="F3") # Open Setting Window
         self.menubar.add_cascade(label="View", menu=self.filemenu2)
 
         self.filemenu3 = Menu(self.menubar, tearoff=0)
         self.filemenu3.add_command(label="Tutorial", command=self.tutorial) # Open Tutorial Window
-        self.filemenu3.add_command(label="About", command=self.about) # Open About Window
+        self.filemenu3.add_command(label="About", command=self.about, accelerator="F1") # Open About Window
         self.filemenu3.add_separator()
         self.filemenu3.add_command(label="Open GitHub Repo", command=lambda aurl="https://github.com/Dadangdut33/sda-3a-06-easy_upscale":OpenUrl(aurl)) # Exit Application
         self.menubar.add_cascade(label="Help", menu=self.filemenu3)
 
         self.root.config(menu=self.menubar)
+
+        self.root.bind("<F1>", self.about)
+        self.root.bind("<F2>", self.open_Setting)
+        self.root.bind("<F3>", self.open_Output)
+
         # Initiation
         self.iniate_Settings_Elements()
         self.fill_Treeview()
@@ -298,11 +337,11 @@ class MainWindow:
             return "break"
 
     # Open the settings window
-    def open_Setting(self):
+    def open_Setting(self, event=None):
         self.settings_window.show()
 
     # Open the output folder
-    def open_Output(self):
+    def open_Output(self, event=None):
         print("Opened output folder")
         settings = fJson.readSetting()
         if settings['output_folder'] == "default":
@@ -321,7 +360,7 @@ class MainWindow:
             subprocess.Popen(['xdg-open', filename])
 
     # About
-    def about(self):
+    def about(self, event=None):
         Mbox("About", "Ez Upscale.\nDibuat untuk memenuhi tugas mata kuliah Struktur Data\n\nVersion: 1.0-tg\nKelompok 10 - Kelas 3A\nAuthor:\n-Fauzan Farhan Antoro\n-Muhammad Hanief Mulfadinar\n", 0, self.root)
 
     # Tutorial
@@ -330,7 +369,7 @@ class MainWindow:
 
     # Browse Image
     def browse_Image(self):
-        dir_pic = f"C:\\Users\\{getpass.getuser()}\\Pictures"
+        dir_pic = f"C:\\Users\\{getpass.getuser()}\\Pictures" # Coba salahin
         self.image_path = filedialog.askopenfilename(initialdir=dir_pic, title="Select file", filetypes=(
             ("image files", "*.jpg"), ('image files', '*.png'), ('image files', '*.jpeg'), # Allow images only
         ))
@@ -394,7 +433,7 @@ class MainWindow:
 
     # Add to queue
     def add_To_Queue(self):
-        if flag.is_Terminating:
+        if global_.is_Terminating:
             return
         # Double checking
         # Check if the image is inputted
@@ -433,11 +472,11 @@ class MainWindow:
         model_name = self.model_choosing_combobox.get()
         scale = self.scaling_options_combobox.get()
         remove_noise = self.remove_Noise_Var.get()
+        img_name = getImgName(image_path)
         
         # Add to queue
-        self.upscale_Queue.enqueue([image_path, getImgName(image_path), getImgDetails(image_path), model_name, scale, remove_noise])
-        # Update the label
-
+        self.upscale_Queue.enqueue([image_path, img_name, getImgDetails(image_path), model_name, scale, remove_noise])
+        
         # Log the queue to console
         self.upscale_Queue.display()
 
@@ -451,33 +490,42 @@ class MainWindow:
 
     # Upscale all
     def upscale_All(self):
-        if flag.is_Terminating:
+        if global_.is_Terminating:
             return
         
-        flag.running_Batch = True
-        flag.mode_batch = True
+        global_.running_Batch = True
+        global_.mode_batch = True
         count = 0
-        while flag.running_Batch: # Looping the queue
+        while global_.running_Batch: # Looping the queue
             self.upscale_Head(True) # Loop the upscale process
             count += 1
+            if global_.is_Terminating:
+                count -= 1
+                global_.is_Terminating = False
+                break
+
             # Check size of queue, if empty then stop
             if self.upscale_Queue.get_Size() == 0:
-                flag.running_Batch = False
-                flag.mode_batch = False
+                global_.running_Batch = False
+                global_.mode_batch = False
                 break
-        if not flag.is_error: # If there is no error then show success message
+        
+        # if nothing is processed and no error then just return / stop
+        if count == 0:
+            return
+
+        if not global_.is_error: # If there is no error and if an image is processed then show success message
             print(">> Batch Upscale process completed, Successfully processes " + str(count) + " images")
             Mbox("Batch Upscale process completed", "Successfully processes " + str(count) + " images", 0, self.root)
         else: # If there is error then show error message
-            flag.is_error = False
-            flag.mode_batch = False
+            global_.is_error = False
+            global_.mode_batch = False
             Mbox("Error", "Upscaling process is canceled because of an error", 1, self.root)
-
 
     # Upscale top
     def upscale_Head(self, running_Batch = False):
-        print(flag.is_Terminating)
-        if flag.is_Terminating:
+        print(global_.is_Terminating)
+        if global_.is_Terminating:
             return
 
         status, headData = self.upscale_Queue.get_Head()
@@ -515,14 +563,14 @@ class MainWindow:
                         Mbox("Success", f"Successfully processed {dequeued_Data[1]}.{getImgType_Only(dequeued_Data[0])}", 0, self.root)
             # Canceled by user
             elif upscale_status == None:
-                flag.is_Terminating = False
+                if not running_Batch: global_.is_Terminating = False
                 print(">> Process canceled by user")
                 Mbox("Canceled", "Upscaling process canceled by user", 1, self.root)
                 self.fill_Treeview()
 
             # Error
-            if flag.is_error == True and not flag.mode_batch:
-                flag.is_error = False
+            if global_.is_error == True and not global_.mode_batch:
+                global_.is_error = False
                 print(">> Error")
                 Mbox("Error", "Upscaling process is canceled because of an error", 1, self.root)
                 self.fill_Treeview()
@@ -533,11 +581,11 @@ class MainWindow:
         else:
             self.fill_Treeview()
             Mbox("Error", "Failed to upscale image.\nReason: " + headData, 2, self.root)
-            flag.is_error = True
+            global_.is_error = True
 
     # Remove top
     def remove_Head(self):
-        if flag.is_Terminating:
+        if global_.is_Terminating:
             return
 
         status, data = self.upscale_Queue.dequeue()
@@ -550,7 +598,7 @@ class MainWindow:
 
     # Remove all
     def clear_Queue(self):
-        if flag.is_Terminating:
+        if global_.is_Terminating:
             return
 
         status = self.upscale_Queue.clear()

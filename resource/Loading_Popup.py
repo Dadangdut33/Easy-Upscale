@@ -1,7 +1,7 @@
 from tkinter import *
 import tkinter.ttk as ttk
 import threading
-from .Public import flag
+from .Public import global_
 
 # Ex:  run_func_with_loading_popup(lambda: task('joe'), 'joe_mama') 
 def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8, pb_length = None):
@@ -46,11 +46,15 @@ def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8
             self.start_bar_thread.start()
         
         def cancel(self):
+            if global_.is_Terminating: # if the program is terminating, then do not cancel
+                return
             print(">> Canceling process")
             self.msg_lbl.config(text="Terminating process, please wait until it finishes...")
-            flag.threads_Running = False
-            flag.is_Terminating = True
-            flag.running_Batch = False
+            global_.threads_Running = False
+            global_.is_Terminating = True
+            global_.running_Batch = False
+            global_.set_Status_Terminating()
+            global_.statusChange("Terminating process, please wait until it finishes...")
             
         def start_bar(self):
             # load bar configuration
@@ -68,7 +72,7 @@ def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8
             self.work_thread.join()
 
             # Quit the loading frame
-            flag.threads_Running = False
+            global_.threads_Running = False
             self.root.quit()
             self.root.wm_withdraw()
 
@@ -77,7 +81,7 @@ def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8
 
     # create root window
     root = Tk()
-    flag.threads_Running = True
+    global_.threads_Running = True
 
     # call Main_Frame class with reference to root as top
     Main_Frame(root, window_title, bounce_speed, pb_length)
