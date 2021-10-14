@@ -12,7 +12,7 @@ class LinearQueue:
         self.capacity = capacity
 
     def is_Full(self):
-        return self.size == len(self.queue)
+        return self.size == self.capacity
 
     def is_Empty(self):
         return self.size == 0
