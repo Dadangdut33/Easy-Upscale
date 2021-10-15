@@ -409,7 +409,8 @@ class MainWindow:
 
     # Queue table
     def fill_Treeview(self):
-        self.queue_label.config(text="Total Item in Queue : " + str(self.upscale_Queue.get_Size()))
+        settings = fJson.readSetting()
+        self.queue_label.config(text=f"Total Item in Queue : {self.upscale_Queue.get_Size()}/{settings['max_queue']}")
 
         # Delete the item in table first
         for i in self.queue_Table.get_children():

@@ -62,7 +62,7 @@ class SettingUI:
         self.spinbox_label.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
 
         # Create a spinbox for queue size
-        self.validateDigits = (self.root.register(self.validateSpinBox), '%P')
+        self.validateDigits = (self.root.register(self.validateSpinBox_Maxqueue), '%P')
         self.queue_spinbox_var = IntVar(self.root)
         self.queue_spinbox = ttk.Spinbox(self.secondFrameContent, from_=1, to=200, width=20, textvariable=self.queue_spinbox_var)
         self.queue_spinbox.pack(side=LEFT, fill=X, expand=False, padx=5, pady=5)
@@ -151,8 +151,16 @@ class SettingUI:
         self.root.wm_withdraw()
 
     # Spinbox validation
-    def validateSpinBox(self, event):
-        return event.isdigit()
+    def validateSpinBox_Maxqueue(self, event):
+        if event.isdigit():
+            # Check value no more than 200
+            if int(event) > 200:
+                self.queue_spinbox_var.set(200)
+                return False
+            else:
+                return event.isdigit()
+        else:
+            return False
 
     # Initiate all the elements
     def iniate_Elements(self):

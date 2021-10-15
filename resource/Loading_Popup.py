@@ -35,7 +35,7 @@ def run_func_with_loading_popup(func, msg, window_title = None, bounce_speed = 8
             self.load_bar.pack(padx = 10, pady = (0,10))
 
             # The cancel button
-            self.cancel_btn = Button(top, text='Cancel', command=self.cancel)
+            self.cancel_btn = ttk.Button(top, text='Cancel', command=self.cancel)
             self.cancel_btn.pack(padx = 10, pady = 5)
 
             self.bar_init()
