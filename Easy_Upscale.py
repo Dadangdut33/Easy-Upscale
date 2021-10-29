@@ -366,7 +366,7 @@ class MainWindow:
 
     # Browse Image
     def browse_Image(self):
-        dir_pic = f"C:\\Users\\{getpass.getuser()}\\Pictures" # Coba salahin
+        dir_pic = f"C:\\Users\\{getpass.getuser()}\\Pictures"
         self.image_path = filedialog.askopenfilename(initialdir=dir_pic, title="Select file", filetypes=(
             ("image files", "*.jpg"), ('image files', '*.png'), ('image files', '*.jpeg'), # Allow images only
         ))
@@ -522,7 +522,6 @@ class MainWindow:
 
     # Upscale top
     def upscale_Head(self, running_Batch = False):
-        print(global_.is_Terminating)
         if global_.is_Terminating:
             return
 
@@ -540,15 +539,19 @@ class MainWindow:
                 dir_Output = fJson.readSetting()['output_path']
 
             # Msg for loading popup
-            if up_Type != "None":
-                noiseRemoved = ' and removing noise' if remove_Noise else ''
-                msg = f'Upscaling {getImgName(img_Path)}.{getImgType_Only(img_Path)}{noiseRemoved}\nusing {up_Type}_x{scale}, please wait...'
-            else:
+            if up_Type != "None": # IF upscaling
+                msg = f'Upscaling {getImgName(img_Path)}.{getImgType_Only(img_Path)}'
+                if remove_Noise:
+                    msg += ' and removing noise'
+                
+                msg += f'\nusing {up_Type}_x{scale}, please wait...'
+            else: # IF only removing noise
                 msg = f'Removing noise for {getImgName(img_Path)}.{getImgType_Only(img_Path)}, please wait...'
 
             # Upscale the image
             upscale_status = run_func_with_loading_popup(
-                lambda: self.upscale.up_type(up_Type, img_Path, scale, remove_Noise, dir_Output), msg, self.window_title, self.bounc_speed, self.pb_length
+                lambda: self.upscale.up_type(up_Type, img_Path, scale, remove_Noise, dir_Output), 
+                msg, self.window_title, self.bounc_speed, self.pb_length
             )
 
             # If success

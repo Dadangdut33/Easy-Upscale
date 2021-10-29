@@ -157,6 +157,9 @@ class SettingUI:
             if int(event) > 200:
                 self.queue_spinbox_var.set(200)
                 return False
+            elif int(event) < 1:
+                self.queue_spinbox_var.set(1)
+                return False
             else:
                 return event.isdigit()
         else:
