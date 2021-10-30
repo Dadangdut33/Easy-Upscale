@@ -197,7 +197,7 @@ class MainWindow:
         self.remove_top_button.pack(side=LEFT, fill=X, padx=5, pady=5)
 
         # Create a button for clear queue
-        self.clear_queue_button = ttk.Button(self.thirdFrameContent_2, text="Clear queue", command=self.clear_Queue)
+        self.clear_queue_button = ttk.Button(self.thirdFrameContent_2, text="Clear/Reset queue", command=self.clear_Queue)
         self.clear_queue_button.pack(side=LEFT, fill=X, padx=5, pady=5)
         
         # Create a treeview for queue
@@ -607,10 +607,14 @@ class MainWindow:
         if global_.is_Terminating:
             return
 
+        # Confirmation
+        if not Mbox("Confirmation", "Are you sure you want to clear/reset the queue?", 3, self.root):
+            return
+
         status = self.upscale_Queue.clear()
         if status:
             self.fill_Treeview()
-            Mbox("Success", "Queue has been cleared successfully", 0, self.root)
+            Mbox("Success", "Queue has been cleared/reseted successfully", 0, self.root)
             self.upscale_Queue.display()
 
 if __name__ == "__main__":

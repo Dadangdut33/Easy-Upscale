@@ -54,7 +54,7 @@ class Circular_Q:
             self.size = 0
             print("Queue has been cleared!")
             is_Success = True
-            global_.statusChange(f"Cleared Queue!")
+            global_.statusChange(f"Cleared/Reseted Queue!")
         except Exception as e:
             print("Fail to clear Queue!\nReason: " + str(e))
             Mbox("Fail to clear Queue!", str(e), 2, global_.main_Frame)
