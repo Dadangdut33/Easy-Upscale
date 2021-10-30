@@ -15,7 +15,7 @@ from resource.Upscale import Upscale, getImgName
 from resource.Queue import Circular_Q
 from resource.Mbox import Mbox
 from resource.Settings import SettingUI
-from resource.Public import fJson, options, optionsVal, global_, TextWithVar
+from resource.Public import fJson, options, optionsVal, global_, TextWithVar, CreateToolTip
 
 # ----------------------------------------------------------------
 # Locals
@@ -148,26 +148,31 @@ class MainWindow:
         # Create a label for model choosing
         self.model_choosing_label = Label(self.secondFrameContent_3, text="Model  : ")
         self.model_choosing_label.pack(side=LEFT, padx=5, pady=5)
+        CreateToolTip(self.model_choosing_label, "Choose the model you want to use, you can choose none if you only want to remove the noise from image")
 
         # Create a combobox for model choosing
         self.model_choosing_combobox = ttk.Combobox(self.secondFrameContent_3, state="readonly", values=options, background="white")
         self.model_choosing_combobox.pack(side=LEFT, padx=5, pady=5)
         self.model_choosing_combobox.current(0)
         self.model_choosing_combobox.bind("<<ComboboxSelected>>", self.change_Model)
+        CreateToolTip(self.model_choosing_combobox, "Choose the model you want to use, you can choose none if you only want to remove the noise from image")
 
         # Create a label for scaling options
         self.scaling_options_label = Label(self.secondFrameContent_3, text="Scale     :  ")
         self.scaling_options_label.pack(side=LEFT, padx=5, pady=5)
+        CreateToolTip(self.scaling_options_label, "Upscale scale, the higher the scale the more resource it will take")
 
         # Create a combobox for scaling options
         self.scaling_options_combobox = ttk.Combobox(self.secondFrameContent_3, state="readonly", values=optionsVal[options[0]], background="white")
         self.scaling_options_combobox.pack(side=LEFT, padx=5, pady=5)
         self.scaling_options_combobox.current(0)
+        CreateToolTip(self.scaling_options_combobox, "Upscale scale, the higher the scale the more resource it will take")
 
         # Create a checkbox for remove noise or not
         self.remove_Noise_Var = BooleanVar()
         self.remove_noise_checkbox = ttk.Checkbutton(self.secondFrameContent_3, text="Remove Noise", variable=self.remove_Noise_Var)
         self.remove_noise_checkbox.pack(side=LEFT, padx=5, pady=5)
+        CreateToolTip(self.remove_noise_checkbox, "Remove noise from image")
 
         # Create a button for image to upscale
         self.add_to_queue_button = ttk.Button(self.secondFrameContent_4, text="Add to queue", command=self.add_To_Queue)
