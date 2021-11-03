@@ -273,6 +273,7 @@ class MainWindow:
 
         self.filemenu3 = Menu(self.menubar, tearoff=0)
         self.filemenu3.add_command(label="Tutorial", command=self.tutorial) # Open Tutorial Window
+        self.filemenu3.add_command(label="Description", command=self.description) # Open Tutorial Window
         self.filemenu3.add_command(label="About", command=self.about, accelerator="F1") # Open About Window
         self.filemenu3.add_separator()
         self.filemenu3.add_command(label="Open GitHub Repo", command=lambda aurl="https://github.com/Dadangdut33/sda-3a-06-easy_upscale":OpenUrl(aurl)) # Exit Application
@@ -368,6 +369,10 @@ class MainWindow:
     # Tutorial
     def tutorial(self):
         Mbox("Tutorial", "1. Search for image\n2. Choose upscale settings option\n3. (Optional) Set image output in settings\n4. Start Upscaling", 0, self.root)
+
+    # Description
+    def description(self):
+        Mbox("Description", "Deskripsi Project\nProgram Upscale Gambar dan Menghilangkan Noise Menggunakan Python-OpenCV Dengan Implementasi\n Konsep Circular Queue", 0, self.root)
 
     # Browse Image
     def browse_Image(self):
