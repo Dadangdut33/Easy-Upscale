@@ -364,7 +364,7 @@ class MainWindow:
 
     # About
     def about(self, event=None):
-        Mbox("About", "Ez Upscale.\nDibuat untuk memenuhi tugas mata kuliah Struktur Data\n\nVersion: 1.0-tg\nKelompok 10 - Kelas 3A\nAuthor:\n-Fauzan Farhan Antoro\n-Muhammad Hanief Mulfadinar\n", 0, self.root)
+        Mbox("About", "Ez Upscale.\nDibuat untuk memenuhi tugas mata kuliah Struktur Data\n\nVersion: 1.0-tg\nKelompok 6 - Kelas 3A\nAuthor:\n-Fauzan Farhan Antoro\n-Muhammad Hanief Mulfadinar\n", 0, self.root)
 
     # Tutorial
     def tutorial(self):
@@ -372,7 +372,7 @@ class MainWindow:
 
     # Description
     def description(self):
-        Mbox("Description", "Deskripsi Project\nProgram Upscale Gambar dan Menghilangkan Noise Menggunakan Python-OpenCV Dengan Implementasi\n Konsep Circular Queue", 0, self.root)
+        Mbox("Description", "Deskripsi Project\nProgram Upscale Gambar dan Menghilangkan Noise Menggunakan Python-OpenCV Dengan Implementasi\nKonsep Circular Queue", 0, self.root)
 
     # Browse Image
     def browse_Image(self):
