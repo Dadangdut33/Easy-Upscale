@@ -39,10 +39,10 @@ class Globals:
 fJson = JsonHandler()
 global_ = Globals()
 
-options = ["ESPCN", "FSRCNN", "FSRCNN-small", "LapSRN", "None"] # EDSR IS TOO SLOW SO ITS REMOVED
+options = ["ESPCN", "FSRCNN", "FSRCNN-small", "LapSRN", "EDSR", "None"]
 
 optionsVal = {
-    # "EDSR": [2, 3, 4],
+    "EDSR": [2, 3, 4],
     "ESPCN": [2, 3, 4],
     "FSRCNN": [2, 3, 4],
     "FSRCNN-small": [2, 3, 4],
