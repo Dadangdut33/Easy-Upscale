@@ -259,7 +259,21 @@ class SettingUI:
             print(settings)
             Mbox("Success", "Successfully set setting to currently stored", 0, self.root)
 
-            self.iniate_Elements()
+            self.queue_spinbox_var.set(fJson.readSetting()["max_queue"])
+            self.image_output_textbox.delete(0, END)
+            self.image_output_textbox.insert(0, fJson.readSetting()["output_path"].replace(r'\resource\..', '').replace('/', '\\'))
+
+            if fJson.readSetting()['output_folder'] == "default": # If default path is checked
+                self.image_output_checkbutton_var.set(True)
+
+            if self.image_output_checkbutton_var.get() == True: # If default path is checked
+                self.image_output_textbox.delete(0, END)
+                self.image_output_textbox.insert(0, fJson.getDefaultImgPath().replace(r'\resource\..', '').replace('/', '\\'))
+                self.image_output_textbox.config(state=DISABLED)
+                self.image_output_button.config(state=DISABLED)
+            else:
+                self.image_output_textbox.config(state=NORMAL)
+                self.image_output_button.config(state=NORMAL)
 
     # Allowed keys
     def allowedKey(self, event):
