@@ -113,13 +113,13 @@ class SettingUI:
         self.save_button = ttk.Button(self.bottomFrame, text="Save", command=self.save_Settings)
         self.save_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
 
+        # Create a button for set to currently set setting
+        self.currently_stored_button = ttk.Button(self.bottomFrame, text="Cancel", command=self.set_Currently_Stored)
+        self.currently_stored_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
+
         # Create a button for copy currently set path
         self.copy_button = ttk.Button(self.bottomFrame, text="Copy Path", command=self.copy_Path)
         self.copy_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
-
-        # Create a button for set to currently set setting
-        self.currently_stored_button = ttk.Button(self.bottomFrame, text="Set to currently saved settings", command=self.set_Currently_Stored)
-        self.currently_stored_button.pack(side=RIGHT, fill=X, expand=False, padx=5, pady=5)
 
         # Create a button for set settings to default
         self.default_button = ttk.Button(self.bottomFrame, text="Set to Default", command=self.set_Default)

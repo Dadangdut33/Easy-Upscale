@@ -4,7 +4,7 @@
 block_cipher = None
 
 
-a = Analysis(['Main.py'],
+a = Analysis(['Easy_Upscale.py'],
              pathex=['./'],
              binaries=[],
              datas=[
@@ -16,7 +16,7 @@ a = Analysis(['Main.py'],
              hookspath=[],
              hooksconfig={},
              runtime_hooks=[],
-             excludes=[],
+             excludes=['pyinstaller'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher,
@@ -28,7 +28,7 @@ exe = EXE(pyz,
           a.scripts, 
           [],
           exclude_binaries=True,
-          name='Main',
+          name='Ez Upscale',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
