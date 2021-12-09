@@ -591,8 +591,15 @@ class MainWindow:
         # Failed to get queue data
         else:
             self.fill_Treeview()
-            Mbox("Error", "Failed to upscale image.\nReason: " + headData, 2, self.root)
-            global_.is_error = True
+            if not running_Batch:
+                # check if the error is queue empty
+                if self.upscale_Queue.get_Size() == 0:
+                    print(">> No more images to process")
+                    Mbox("Error", "Queue is empty!", 2, self.root)
+            else:
+                print(">> Failed to upscale")
+                Mbox("Error", "Failed to upscale image! \nReason: " + headData, 2, self.root)
+                global_.is_error = True
 
     # Remove top
     def remove_Head(self):
