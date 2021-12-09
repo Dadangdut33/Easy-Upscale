@@ -1,3 +1,13 @@
+
+<h1 align="center">Easy Upscale</h1>
+
+
+<p align="center">
+    <img src="https://github.com/Dadangdut33/sda-3a-06-easy_upscale/blob/main/img/screenshots/front.png?raw=true" style="width: 500px;">
+    <img src="https://github.com/Dadangdut33/sda-3a-06-easy_upscale/blob/main/img/screenshots/processing.png?raw=true" style="width: 500px;">
+    <img src="https://github.com/Dadangdut33/sda-3a-06-easy_upscale/blob/main/img/screenshots/settings.png?raw=true" style="width: 500px;">
+</p>
+
 # About
 Repository kelompok 6  struktur data kelas 3A\
 Anggota:
